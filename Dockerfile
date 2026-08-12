@@ -1,5 +1,6 @@
 FROM php:8.2-cli
 
+# Installation des extensions système et PHP nécessaires
 RUN apt-get update && apt-get install -y \
     libpq-dev \
     libzip-dev \
@@ -24,4 +25,5 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 
 EXPOSE 10000
 
-CMD php artisan config:clear && php artisan route:clear && php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=10000 --public=public
+# Lancement du serveur intégré PHP en ciblant directement le dossier public
+CMD php artisan config:clear && php artisan route:clear && php artisan migrate --force && php -S 0.0.0.0:10000 -t public/
