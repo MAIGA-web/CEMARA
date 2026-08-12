@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -11,9 +12,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // Désactive temporairement la vérification des tokens CSRF sur TOUTES les routes
+        // Faire confiance à tous les reverse proxies (Render)
+        $middleware->trustProxies(at: '*');
+
+        // Réactiver la vérification CSRF (maintenant que le proxy est configuré)
         $middleware->validateCsrfTokens(except: [
-            '*',
+            // Retirez le '*' pour sécuriser à nouveau l'application
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
