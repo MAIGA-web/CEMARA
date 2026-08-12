@@ -1,4 +1,3 @@
-cat << 'EOF' > Dockerfile
 FROM php:8.2-fpm
 
 # Installation des dépendances système et des extensions PHP (pdo_pgsql)
@@ -26,4 +25,3 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 
 # Commande de lancement
 CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=10000
-EOF
