@@ -27,11 +27,16 @@ class AuthController extends Controller
             $request->session()->regenerate();
             $user = Auth::user();
 
-            // 1. VERIFICATION SI LA FERME EST SUSPENDUE (fer_etat == 1)
-            // On récupère la ferme de l'utilisateur
-            $ferme = Ferme::find($user->fer_id);
+            // 1. REDIRECTION IMMÉDIATE POUR SUPER ADMIN (user_etat == 1)
+            if ($user->user_etat == 1) {
+                return redirect()->route('SuperAdmin.index');
+            }
+
+            // 2. RÉCUPÉRATION SÉCURISÉE DE LA FERME
+            $ferme = $user->fer_id ? Ferme::find($user->fer_id) : null;
             
-            if ($ferme && $ferme->fer_etat == 1 && $user->user_etat!=1) {
+            // Si la ferme existe et est suspendue (ex: fer_etat == 1)
+            if ($ferme && isset($ferme->fer_etat) && $ferme->fer_etat == 1) {
                 Auth::logout();
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
@@ -39,19 +44,13 @@ class AuthController extends Controller
                 return back()->withErrors(['auth' => 'Votre ferme est suspendue. Accès refusé.']);
             }
 
-            // 2. LOGIQUE DE REDIRECTION SELON LE RÔLE
-            // Si c'est un Super Admin (user_etat == 1)
-            if ($user->user_etat == 1) {
-                return redirect()->route('SuperAdmin.index');
-            }
-
-            // Si c'est un utilisateur normal actif
+            // 3. STOCKAGE EN SESSION AVEC VALEUR PAR DÉFAUT (Évite le crash sur null)
             session([
                 'fer_id'  => $user->fer_id,
-                'fer_nom' => $ferme->fer_nom ?? 'Ma Ferme'
+                'fer_nom' => $ferme ? $ferme->fer_nom : 'Ma Ferme'
             ]);
 
-            return redirect()->intended('dashboard');
+            return redirect()->intended('/dashboard');
         }
 
         return back()->withErrors(['auth' => 'Email ou mot de passe incorrect.']);
@@ -72,7 +71,7 @@ class AuthController extends Controller
             'user_etat' => 'required',
         ]);
 
-        // 1. Créer la Ferme d'abord (fer_etat est probablement à 0 par défaut)
+        // 1. Créer la Ferme d'abord
         $ferme = Ferme::create([
             'fer_nom' => $request->nom_ferme,
         ]);
