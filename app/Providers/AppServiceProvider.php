@@ -20,10 +20,9 @@ class AppServiceProvider extends ServiceProvider
      * Bootstrap any application services.
      */
 public function boot(): void
-{
-    // Force le HTTPS si l'application est consultée via un proxy sécurisé (comme ngrok)
-if (Request::header('X-Forwarded-Proto') === 'https') {
-        URL::forceScheme('https');
+    {
+        if (config('app.env') === 'production' || request()->server->get('HTTP_X_FORWARDED_PROTO') == 'https') {
+            URL::forceScheme('https');
+        }
     }
-}
 }
