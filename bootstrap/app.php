@@ -12,15 +12,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // Indique à Laravel de faire confiance au reverse-proxy de Render
-        $middleware->trustProxies(
-            // at: '*',
-            headers: Request::HEADER_X_FORWARDED_FOR |
-                     Request::HEADER_X_FORWARDED_HOST |
-                     Request::HEADER_X_FORWARDED_PORT |
-                     Request::HEADER_X_FORWARDED_PROTO |
-                     Request::HEADER_X_FORWARDED_AWS_ELB
-        );
+        // Faire confiance à tous les proxies Render
+        $middleware->trustProxies(at: '*');
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
