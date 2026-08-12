@@ -4,14 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- AJOUT DE LA BALISE CSRF META -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Connexion | CEMARA Multi-Ferme</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        /* #back {
-            background-image: url('poules.png');
-        } */
-
         body {
             background: linear-gradient(135deg, #078697 0%, #035964 100%);
             font-family: 'Poppins', sans-serif;
@@ -93,8 +91,7 @@
 
     <div class="login-card">
         <div class="text-center mb-4">
-            <div
-                style="background: #18828a;; width: 60px; height: 60px; border-radius: 15px; display: inline-flex; align-items: center; justify-content: center; color: white; font-size: 30px; font-weight: bold;">
+            <div style="background: #18828a; width: 60px; height: 60px; border-radius: 15px; display: inline-flex; align-items: center; justify-content: center; color: white; font-size: 30px; font-weight: bold;">
                 C
             </div>
         </div>
@@ -110,7 +107,8 @@
             </div>
         @endif
 
-        <form action="{{ url('/login') }}" method="POST">
+        <!-- ACTION MODIFIÉE ICI -->
+        <form action="{{ route('login') }}" method="POST">
             @csrf
             <div class="mb-3">
                 <label for="email" class="form-label small fw-bold">Email</label>
@@ -122,10 +120,6 @@
                 <label for="password" class="form-label small fw-bold">Mot de passe</label>
                 <input type="password" name="password" class="form-control" id="password" placeholder="••••••••"
                     required>
-            </div>
-
-            <div class="d-flex justify-content-between align-items-center mb-4">
-
             </div>
 
             <button type="submit" class="btn btn-login">Se connecter</button>
