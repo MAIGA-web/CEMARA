@@ -21,7 +21,8 @@ RUN apt-get update && apt-get install -y \
     unzip \
     git \
     curl \
-    && docker-php-ext-install pdo pdo_pgsql zip bcmath mbstring gd
+    && docker-php-ext-install pdo pdo_pgsql zip bcmath mbstring gd \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Installation de Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -29,7 +30,7 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
 COPY . .
 
-# Installation des dépendances Composer sans exécuter de scripts post-install qui peuvent échouer
+# Installation des dépendances Composer
 RUN composer install --no-dev --optimize-autoloader --no-scripts --ignore-platform-reqs
 
 # Création explicite des sous-dossiers de storage
@@ -45,8 +46,14 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 
 EXPOSE 10000
 
-# Démarrage d'Apache en priorité absolue
-CMD php artisan config:clear || true; \
-    php artisan cache:clear || true; \
-    php artisan view:clear || true; \
-    apache2-foreground
+# Script d'exécution au démarrage du conteneur
+RUN printf '#!/bin/sh\n\
+php artisan config:clear\n\
+php artisan cache:clear\n\
+php artisan view:clear\n\
+php artisan route:clear\n\
+php artisan migrate --force || true\n\
+exec apache2-foreground\n' > /usr/local/bin/docker-run.sh \
+    && chmod +x /usr/local/bin/docker-run.sh
+
+CMD ["/usr/local/bin/docker-run.sh"]
