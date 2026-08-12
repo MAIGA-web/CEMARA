@@ -12,6 +12,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         // On ajoute le middleware à la pile 'web'
+         $middleware->trustProxies(at: '*');
         $middleware->web(append: [
             \App\Http\Middleware\IdentifyFerme::class,
         ]);
@@ -19,3 +20,4 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions): void {
         //
     })->create();
+    
