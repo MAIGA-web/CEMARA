@@ -37,5 +37,5 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 
 EXPOSE 10000
 
-# Démarrage sans migration automatique (pour éviter de faire planter le build)
-CMD php artisan config:clear && php artisan route:cache && php artisan view:cache && apache2-foreground
+# Exécute la migration automatiquement au démarrage sans passer par le Shell payant
+CMD php artisan config:clear && php artisan route:cache && php artisan view:cache && php artisan migrate --force && apache2-foreground
