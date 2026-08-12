@@ -22,6 +22,16 @@ use App\Http\Controllers\VenteController;
 use App\Http\Controllers\VeterinaireController;
 use Illuminate\Support\Facades\Route;
 
+// --- TEST DE SESSION SANS AUTHENTIFICATION (À supprimer en production) ---
+Route::get('/test-session-set', function () {
+    session(['mon_test' => 'SESSION_OK']);
+    return redirect('/test-session-get');
+});
+
+Route::get('/test-session-get', function () {
+    return 'Résultat de la session : ' . session('mon_test', 'PERDUE !');
+});
+
 // --- ROUTES PUBLIQUES ---
 Route::get('/', [AuthController::class, 'showLogin']);
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -186,20 +196,4 @@ Route::middleware(['auth'])->group(function () {
     Route::match(['get', 'post'], '/Collections', [CollectionController::class, 'handleAction'])->name('collections.handle');
     Route::match(['get', 'post'], '/Collections/add-edit', [CollectionController::class, 'handleAction']);
 
-    Route::get('/test-session-set', function () {
-    session(['mon_test' => 'SESSION_OK']);
-    return redirect('/test-session-get');
-});
-
-Route::get('/test-session-get', function () {
-    return 'Résultat de la session : ' . session('mon_test', 'PERDUE !');
-});
-});
-Route::get('/test-session-set', function () {
-    session(['mon_test' => 'SESSION_OK']);
-    return redirect('/test-session-get');
-});
-
-Route::get('/test-session-get', function () {
-    return 'Résultat de la session : ' . session('mon_test', 'PERDUE !');
 });
