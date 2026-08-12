@@ -18,7 +18,7 @@ return [
     |
     */
 
-    'driver' => env('SESSION_DRIVER', 'file'),
+   'driver' => env('SESSION_DRIVER', 'database'),
 
     /*
     |--------------------------------------------------------------------------
@@ -153,8 +153,7 @@ return [
     |
     */
 
-    'domain' => env('SESSION_DOMAIN'),
-
+    'domain' => env('SESSION_DOMAIN', null),
     /*
     |--------------------------------------------------------------------------
     | HTTPS Only Cookies
@@ -166,7 +165,7 @@ return [
     |
     */
 
-    'secure' => null,
+   'secure' => env('SESSION_SECURE_COOKIE', true),
 
     /*
     |--------------------------------------------------------------------------
@@ -196,7 +195,7 @@ return [
     |
     */
 
-   'same_site' => 'none',
+   'same_site' => 'lax',
 
     /*
     |--------------------------------------------------------------------------
