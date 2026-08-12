@@ -12,7 +12,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // Indique à Laravel qu'il est derrière le reverse proxy HTTPS de Render
+        // Faire confiance aux proxies Render pour récupérer les headers HTTPS
         $middleware->trustProxies(at: '*');
     })
     ->withExceptions(function (Exceptions $exceptions) {
