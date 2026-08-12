@@ -12,13 +12,15 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // Faire confiance à tous les reverse proxies (Render)
-        $middleware->trustProxies(at: '*');
-
-        // Réactiver la vérification CSRF (maintenant que le proxy est configuré)
-        $middleware->validateCsrfTokens(except: [
-            // Retirez le '*' pour sécuriser à nouveau l'application
-        ]);
+        // Indique à Laravel de faire confiance au reverse-proxy de Render
+        $middleware->trustProxies(
+            at: '*',
+            headers: Request::HEADER_X_FORWARDED_FOR |
+                     Request::HEADER_X_FORWARDED_HOST |
+                     Request::HEADER_X_FORWARDED_PORT |
+                     Request::HEADER_X_FORWARDED_PROTO |
+                     Request::HEADER_X_FORWARDED_AWS_ELB
+        );
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
