@@ -4,6 +4,8 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 
+use Illuminate\Http\Request;
+
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
@@ -11,14 +13,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // 1. Confiance absolue au Proxy Render
+        // Faire confiance à tous les reverse proxies (Render)
         $middleware->trustProxies(at: '*');
-
-        // 2. Exclure temporairement le login du contrôle CSRF pour stopper l'erreur 419
-        $middleware->validateCsrfTokens(except: [
-            'login',
-            'login/*',
-        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
