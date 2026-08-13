@@ -12,16 +12,18 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
-->withMiddleware(function (Middleware $middleware) {
-    $middleware->trustProxies(at: '*');
-
-    // Exclure temporairement la route de connexion du contrôle CSRF
-    $middleware->validateCsrfTokens(except: [
-        'login',
-        'login/*',
-        'inscription',
-    ]);
-})
+    ->withMiddleware(function (Middleware $middleware) {
+        // Faire confiance à TOUS les proxies (Render Load Balancer)
+        $middleware->trustProxies(at: '*');
+        
+        // Faire confiance à tous les en-têtes de forwarding
+        $middleware->trustProxies(headers: Request::HEADER_X_FORWARDED_FOR | 
+            Request::HEADER_X_FORWARDED_HOST | 
+            Request::HEADER_X_FORWARDED_PORT | 
+            Request::HEADER_X_FORWARDED_PROTO | 
+            Request::HEADER_X_FORWARDED_AWS_ELB
+        );
+    })
     ->withExceptions(function (Exceptions $exceptions) {
         //
     })->create();

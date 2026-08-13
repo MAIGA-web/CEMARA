@@ -14,8 +14,8 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // Indique à Laravel que toutes les URLs et tokens CSRF doivent être en HTTPS
-        if (config('app.env') === 'production' || isset($_SERVER['HTTP_X_FORWARDED_PROTO'])) {
+        // Force Laravel à générer des URLs et des Cookies en HTTPS sur Render
+        if (config('app.env') === 'production' || isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
             URL::forceScheme('https');
         }
     }
