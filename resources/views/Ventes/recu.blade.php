@@ -1,41 +1,46 @@
 <page backtop="10mm" backbottom="10mm" backleft="10mm" backright="10mm">
     <page_footer>
-    <div style="text-align: center; font-size: 10px; color: #555;">
-        <hr style="color: #ccc;">
-        @if($ferme)
-            Adresse : {{ $ferme->fer_adresse }} – Tél : {{ $ferme->fer_telephone }} – Email : {{ $ferme->fer_email }}
-        @elseif(auth()->user()->ferme)
-            Adresse : {{ auth()->user()->ferme->fer_adresse }} – Tél : {{ auth()->user()->ferme->fer_telephone }} – Email : {{ auth()->user()->ferme->fer_email }}
-        @endif
-    </div>
-</page_footer>
+        <div style="text-align: center; font-size: 10px; color: #555;">
+            <hr style="color: #ccc;">
+            @if ($ferme)
+                Adresse : {{ $ferme->fer_adresse }} – Tél : {{ $ferme->fer_telephone }} – Email :
+                {{ $ferme->fer_email }}
+            @elseif(auth()->user()->ferme)
+                Adresse : {{ auth()->user()->ferme->fer_adresse }} – Tél : {{ auth()->user()->ferme->fer_telephone }} –
+                Email : {{ auth()->user()->ferme->fer_email }}
+            @endif
+        </div>
+    </page_footer>
 
     <!-- Header -->
-<table style="width: 100%; vertical-align: middle; border-collapse: collapse;">
-    <tr>
-        <td style="width: 30%; text-align: left;">
-            @if($ferme->fer_logo)
-                <img src="{{ public_path('storage/' . $ferme->fer_logo) }}" alt="Logo" style="width: 80px; height: auto;">
-            @else
-                <div style="width: 80px; height: 80px; border: 1px dashed #ccc; text-align: center; line-height: 80px; color: #aaa; font-size: 12px;">Sans Logo</div>
-            @endif
-        </td>
-        
-        <td style="width: 70%; text-align: right;">
-            <h1 style="color: #007bff; margin: 0 0 5px 0; font-size: 24px;">
-                @if (auth()->user()->user_etat == 1)
-                    {{ session('fer_nom', 'Administration Globale') }}
+    <table style="width: 100%; vertical-align: middle; border-collapse: collapse;">
+        <tr>
+            <td style="width: 30%; text-align: left;">
+                @if ($ferme && $ferme->fer_logo && file_exists(public_path('storage/' . $ferme->fer_logo)))
+                    <img src="{{ public_path('storage/' . $ferme->fer_logo) }}" alt="Logo"
+                        style="width: 80px; height: auto;">
                 @else
-                    {{ auth()->user()->ferme->fer_nom }}
+                    <div
+                        style="width: 80px; height: 80px; border: 1px dashed #ccc; text-align: center; line-height: 80px; color: #aaa; font-size: 12px;">
+                        Sans Logo</div>
                 @endif
-            </h1>
-            <span style="font-size: 14px; color: #555;">
-                À {{ auth()->user()->ferme->fer_adresse ?? 'Adresse non spécifiée' }}
-            </span>
-        </td>
-    </tr>
-</table>
-<hr>
+            </td>
+
+            <td style="width: 70%; text-align: right;">
+                <h1 style="color: #007bff; margin: 0 0 5px 0; font-size: 24px;">
+                    @if (auth()->user()->user_etat == 1)
+                        {{ session('fer_nom', 'Administration Globale') }}
+                    @else
+                        {{ auth()->user()->ferme->fer_nom }}
+                    @endif
+                </h1>
+                <span style="font-size: 14px; color: #555;">
+                    À {{ auth()->user()->ferme->fer_adresse ?? 'Adresse non spécifiée' }}
+                </span>
+            </td>
+        </tr>
+    </table>
+    <hr>
 
     <div style="text-align: center; margin-top: 30px;">
         <h2 style="text-decoration: none; color: #333;">Reçu de Paiement</h2>
@@ -71,9 +76,11 @@
                     <td style="border: 1px solid #ccc; padding: 8px;">{{ $p->produit->pro_nom }}</td>
                     <td style="border: 1px solid #ccc; padding: 8px;">{{ $p->produit->pro_type }}</td>
                     <td style="border: 1px solid #ccc; padding: 8px;">{{ $p->vdr_qte }}</td>
-                    <td style="border: 1px solid #ccc; padding: 8px;">{{ number_format($p->vdr_pu, 0, ',', ' ') }} FCFA</td>
-                    <td style="border: 1px solid #ccc; padding: 8px;">{{ number_format($p->vdr_qte * $p->vdr_pu,0, ',',' ' )}} FCFA</td>
-                    
+                    <td style="border: 1px solid #ccc; padding: 8px;">{{ number_format($p->vdr_pu, 0, ',', ' ') }} FCFA
+                    </td>
+                    <td style="border: 1px solid #ccc; padding: 8px;">
+                        {{ number_format($p->vdr_qte * $p->vdr_pu, 0, ',', ' ') }} FCFA</td>
+
                 </tr>
             @endforeach
         </tbody>
@@ -89,7 +96,7 @@
             <tr>
                 <td style="padding: 5px; text-align: right;"><b>Montant Payé :</b></td>
                 <td style="padding: 5px; text-align: right;">
-                    {{ number_format($totalPaye,0, ',', ' ') }} FCFA
+                    {{ number_format($totalPaye, 0, ',', ' ') }} FCFA
                 </td>
             </tr>
             <tr>

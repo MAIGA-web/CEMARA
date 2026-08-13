@@ -13,7 +13,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // Active le groupe de middlewares Web par défaut (nécessaire pour les cookies)
+        // Indispensable pour le Reverse Proxy HTTPS de Render
         $middleware->trustProxies(at: '*');
     })
     ->withExceptions(function (Exceptions $exceptions) {

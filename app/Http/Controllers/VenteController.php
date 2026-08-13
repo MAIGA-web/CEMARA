@@ -333,40 +333,58 @@ public function editPaiement($id)
             ->with('success_message', 'Vente validée et stock mis à jour avec succès !');
     }
 
-   public function recuPaiement($id)
-{
-    // 1. Charger la vente AVEC ses paiements et son client
-    $vente = \App\Models\Vente::with(['client', 'paiements'])->findOrFail($id);
+public function recuPaiement($id)
+    {
+        // 1. Charger la vente AVEC ses paiements et son client
+        $vente = \App\Models\Vente::with(['client', 'paiements'])->findOrFail($id);
 
-    // Récupérer la ferme via la session, sinon la vente, sinon l'utilisateur
-    $fermeId = session('fer_id') ?? $vente->fer_id ?? auth()->user()->fer_id;
-    $ferme = Ferme::find($fermeId);
+        // Récupérer la ferme via la session, sinon la vente, sinon l'utilisateur
+        $fermeId = session('fer_id') ?? $vente->fer_id ?? auth()->user()->fer_id;
+        $ferme = Ferme::find($fermeId);
 
-    // 2. Récupérer les produits
-    $produits = \App\Models\Vendre::with('produit')->where('vte_id', $id)->get();
+        // --- GESTION ET VÉRIFICATION SÉCURISÉE DU LOGO POUR HTML2PDF ---
+        $logoPath = null;
+        if ($ferme && $ferme->logo) {
+            $checkPath = storage_path('app/public/logos/' . $ferme->logo);
+            
+            // Si le fichier existe physiquement sur le disque du serveur
+            if (file_exists($checkPath)) {
+                $logoPath = $checkPath;
+            }
+        }
 
-    $totalPaye = $vente->paiements->where('pa_etat', true)->sum('pa_payer');
-    $resteAPayer = $vente->vte_total - $totalPaye;
+        // Si l'image n'existe pas, on bascule sur un logo par défaut dans public/ ou null
+        if (!$logoPath) {
+            $defaultLogo = public_path('assets/images/logo.png'); // Ajustez selon votre projet
+            $logoPath = file_exists($defaultLogo) ? $defaultLogo : null;
+        }
 
-    $content = view('Ventes.recu', [
-        'vente' => $vente,
-        'paiements' => $vente->paiements,
-        'produits' => $produits,
-        'resteAPayer' => $resteAPayer,
-        'totalPaye' => $totalPaye,
-        'ferme' => $ferme
-    ])->render();
+        // 2. Récupérer les produits
+        $produits = \App\Models\Vendre::with('produit')->where('vte_id', $id)->get();
 
-    if (ob_get_contents()) ob_end_clean();
-    ob_start();
+        $totalPaye = $vente->paiements->where('pa_etat', true)->sum('pa_payer');
+        $resteAPayer = $vente->vte_total - $totalPaye;
 
-    try {
-        $html2pdf = new Html2Pdf('P', 'A4', 'fr');
-        $html2pdf->writeHTML($content);
-        $html2pdf->output('Recu_Vente_' . $id . '.pdf', 'I');
-        exit;
-    } catch (\Spipu\Html2Pdf\Exception\Html2PdfException $e) {
-        return $e->getMessage();
+        $content = view('Ventes.recu', [
+            'vente' => $vente,
+            'paiements' => $vente->paiements,
+            'produits' => $produits,
+            'resteAPayer' => $resteAPayer,
+            'totalPaye' => $totalPaye,
+            'ferme' => $ferme,
+            'logoPath' => $logoPath // On passe le chemin vérifié à la vue
+        ])->render();
+
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+
+        try {
+            $html2pdf = new Html2Pdf('P', 'A4', 'fr');
+            $html2pdf->writeHTML($content);
+            $html2pdf->output('Recu_Vente_' . $id . '.pdf', 'I');
+            exit;
+        } catch (\Spipu\Html2Pdf\Exception\Html2PdfException $e) {
+            return $e->getMessage();
+        }
     }
-}
 }
