@@ -110,9 +110,6 @@
                 </div>
                 <div class="header-menu">
                     <div class="header-left">
-                        <span class="font-10 badge badge-primary text-center font-weight-medium"> 
-                       FERME {{ session('fer_nom', auth()->user()->ferme->fer_nom ?? 'Aucune ferme sélectionnée') }}
-                        </span>
                         <button class="search-trigger"><i class="fa fa-search"></i></button>
                         <div class="form-inline">
                             <form class="search-form">
