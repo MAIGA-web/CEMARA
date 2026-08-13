@@ -107,7 +107,7 @@
             <div class="top-right">
                 <div class="header-menu">
                     <div class="header-left">
-                        <span class="font-20 badge badge-primary text-center font-weight-medium"> 
+                        <span class="font-10 badge badge-primary text-center font-weight-medium"> 
                        FERME {{ session('fer_nom', auth()->user()->ferme->fer_nom ?? 'Aucune ferme sélectionnée') }}
                         </span>
                         <button class="search-trigger"><i class="fa fa-search"></i></button>
@@ -119,7 +119,7 @@
                             </form>
                         </div>
                         <div class="user-area dropdown float-right">
-                            <span class="mr-2">
+                            <span>
                                 @if (auth()->user()->user_etat == 1)
                                     <span class="badge badge-danger">SUPER ADMIN</span>
                                 @else
