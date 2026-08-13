@@ -49,10 +49,9 @@ EXPOSE 10000
 # Script d'exécution au démarrage du conteneur
 RUN printf '#!/bin/sh\n\
 php artisan config:clear\n\
+php artisan route:clear\n\
 php artisan cache:clear\n\
 php artisan view:clear\n\
-php artisan route:clear\n\
-php artisan migrate --force || true\n\
 chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache\n\
 chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache\n\
 exec apache2-foreground\n' > /usr/local/bin/docker-run.sh \
