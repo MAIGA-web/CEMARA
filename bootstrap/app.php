@@ -12,10 +12,16 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
-    ->withMiddleware(function (Middleware $middleware) {
-        // Faire confiance à tous les reverse proxies (Render)
-        $middleware->trustProxies(at: '*');
-    })
+->withMiddleware(function (Middleware $middleware) {
+    $middleware->trustProxies(at: '*');
+
+    // Exclure temporairement la route de connexion du contrôle CSRF
+    $middleware->validateCsrfTokens(except: [
+        'login',
+        'login/*',
+        'inscription',
+    ]);
+})
     ->withExceptions(function (Exceptions $exceptions) {
         //
     })->create();
