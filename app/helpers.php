@@ -1,4 +1,3 @@
-
 <?php
 if (!function_exists('get_all_records')) {
     /**

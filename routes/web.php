@@ -22,17 +22,13 @@ use App\Http\Controllers\VeterinaireController;
 use Illuminate\Support\Facades\Route;
 
 
-Route::get('/test-cookie-raw', function () {
-    // 1. Force l'envoi d'un cookie HTTP pur via les en-têtes PHP
-    header('Set-Cookie: test_manuel=SUCCES; Path=/; Secure; HttpOnly; SameSite=Lax');
-    
-    // 2. Initialise la session PHP native
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
-    }
-    $_SESSION['test_native'] = 'OK';
+Route::get('/test-session-set', function () {
+    session(['mon_test' => 'SESSION_OK']);
+    return redirect('/test-session-get');
+});
 
-    return 'Test cookie manuel envoyé ! Session native : ' . $_SESSION['test_native'];
+Route::get('/test-session-get', function () {
+    return 'Résultat de la session : ' . session('mon_test', 'PERDUE !');
 });
 
 // --- TEST DE SESSION SANS AUTHENTIFICATION (À supprimer en production) ---
