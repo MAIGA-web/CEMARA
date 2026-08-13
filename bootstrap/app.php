@@ -13,16 +13,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // Faire confiance à TOUS les proxies (Render Load Balancer)
+        // Active le groupe de middlewares Web par défaut (nécessaire pour les cookies)
         $middleware->trustProxies(at: '*');
-        
-        // Faire confiance à tous les en-têtes de forwarding
-        $middleware->trustProxies(headers: Request::HEADER_X_FORWARDED_FOR | 
-            Request::HEADER_X_FORWARDED_HOST | 
-            Request::HEADER_X_FORWARDED_PORT | 
-            Request::HEADER_X_FORWARDED_PROTO | 
-            Request::HEADER_X_FORWARDED_AWS_ELB
-        );
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

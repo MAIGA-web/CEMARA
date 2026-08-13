@@ -22,6 +22,12 @@ use App\Http\Controllers\VenteController;
 use App\Http\Controllers\VeterinaireController;
 use Illuminate\Support\Facades\Route;
 
+
+Route::get('/test-cookie-raw', function () {
+    return response('Test Cookie Output')
+        ->cookie('test_direct', 'FONCTIONNE', 60, null, null, false, false);
+});
+
 // --- TEST DE SESSION SANS AUTHENTIFICATION (À supprimer en production) ---
 Route::get('/test-session-set', function () {
     session(['mon_test' => 'SESSION_OK']);
