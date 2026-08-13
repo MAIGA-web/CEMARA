@@ -103,8 +103,6 @@
                             alt="Logo"></a>
                     <a id="menuToggle" class="menutoggle"><i class="fa fa-bars"></i></a>
                 </div>
-            </div>
-            <div class="top-right">
                 <div class="header-menu">
                     <div class="header-left">
                         <span class="font-10 badge badge-primary text-center font-weight-medium"> 
