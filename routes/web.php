@@ -1,5 +1,5 @@
 <?php
-
+session_start();
 use App\Http\Controllers\AchatController;
 use App\Http\Controllers\AlimentationController;
 use App\Http\Controllers\AuthController;
@@ -24,8 +24,16 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::get('/test-cookie-raw', function () {
-    return response('Test Cookie Output')
-        ->cookie('test_direct', 'FONCTIONNE', 60, null, null, false, false);
+    // 1. Force l'envoi d'un cookie HTTP pur via les en-têtes PHP
+    header('Set-Cookie: test_manuel=SUCCES; Path=/; Secure; HttpOnly; SameSite=Lax');
+    
+    // 2. Initialise la session PHP native
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+    $_SESSION['test_native'] = 'OK';
+
+    return 'Test cookie manuel envoyé ! Session native : ' . $_SESSION['test_native'];
 });
 
 // --- TEST DE SESSION SANS AUTHENTIFICATION (À supprimer en production) ---

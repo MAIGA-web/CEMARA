@@ -1,3 +1,7 @@
+<IfModule mod_headers.c>
+    Header always set Access-Control-Allow-Credentials "true"
+</IfModule>
+
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes
@@ -5,11 +9,10 @@
 
     RewriteEngine On
 
-    # Gérer les en-têtes d'autorisation et de cookies
+    # Redirection propre vers index.php
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
-    # Redirection vers index.php
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
