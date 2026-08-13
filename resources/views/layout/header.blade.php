@@ -102,14 +102,17 @@
                 <div class="navbar-header">
 
                     <a class="navbar-brand" href="{{ route('dashboard') }}">
-                        <h2 class="logo-text font-20 text-primary font-weight-medium">CƐMARA</h2>
+                        <h2 class="logo-text font-10 text-primary font-weight-medium">CƐMARA</h2>
                     </a>
                     <a class="navbar-brand hidden" href="./"><img src="{{ asset('images/logo2.png') }}"
                             alt="Logo"></a>
                     <a id="menuToggle" class="menutoggle"><i class="fa fa-bars"></i></a>
                 </div>
+            </div>
+            <div class="top-right">
                 <div class="header-menu">
                     <div class="header-left">
+                       
                         <button class="search-trigger"><i class="fa fa-search"></i></button>
                         <div class="form-inline">
                             <form class="search-form">
@@ -118,7 +121,7 @@
                                 <button class="search-close" type="submit"><i class="fa fa-close"></i></button>
                             </form>
                         </div>
-                        <div class="user-area dropdown float-right">
+                        <div class="user-area dropdown">
                             <span>
                                 @if (auth()->user()->user_etat == 1)
                                     <span class="badge badge-danger">SUPER ADMIN</span>
@@ -144,7 +147,7 @@
                                     style="height: 35px; width: 35px; border-radius: 50%; object-fit: cover; border: 1px solid #18828a;">
                             @else
                                 <div class="mr-2 bg-primary text-white d-flex align-items-center justify-content-center font-weight-bold"
-                                    style="height: 35px; width: 35px; border-radius: 50%; font-size: 16px;">
+                                    style="height: 35px; width: 35px; border-radius: 50%; font-size: 10px;">
                                     {{ substr($fermeActive->fer_nom ?? 'C', 0, 1) }}
                                 </div>
                             @endif
