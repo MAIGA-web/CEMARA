@@ -1,5 +1,4 @@
 <?php
-session_start();
 use App\Http\Controllers\AchatController;
 use App\Http\Controllers\AlimentationController;
 use App\Http\Controllers\AuthController;
