@@ -125,9 +125,6 @@
             <button type="submit" class="btn btn-login">Se connecter</button>
         </form>
 
-        <div class="footer-text">
-            &copy; 2026 CEMARA Edu. Tous droits réservés.
-        </div>
     </div>
 
 </body>
