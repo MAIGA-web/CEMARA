@@ -232,7 +232,7 @@
                                     </a>
                                     
                                     <a href="{{ route('dashboard') }}" class="btn btn-outline-success btn-block text-left mb-2">
-                                        <i class="fa fa-tachometer mr-2"></i> Ouvrir son Dashboard
+                                        <i class="fa fa-tachometer mr-2"></i> Ouvrir son Menu
                                     </a>
 
                                     <div class="p-3 bg-light rounded mt-3">
