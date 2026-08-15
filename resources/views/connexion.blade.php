@@ -11,7 +11,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         body {
+<<<<<<< HEAD
            background:  url("{{ asset('images/poules.png') }}") center/cover no-repeat fixed;
+=======
+           background:url("{{ asset('images/poules.png') }}") center/cover no-repeat fixed;
+>>>>>>> 269f339bbc5ed4a8539e8926c2e630d68448b4f5
             font-family: 'Poppins', sans-serif;
             height: 100vh;
             display: flex;
