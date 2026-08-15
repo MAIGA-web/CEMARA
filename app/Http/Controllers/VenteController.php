@@ -302,36 +302,37 @@ public function editPaiement($id)
         return redirect()->back()->with('success_message', 'Paiement supprimé.');
     }
 
-    public function valider($id)
-    {
-        $vente = Vente::findOrFail($id);
+public function valider($id)
+{
+    $vente = Vente::findOrFail($id);
 
-        // 1. Récupérer tous les produits liés à cette vente
-        $produitsVendus = \App\Models\Vendre::where('vte_id', $id)->get();
+    if ($vente->vte_etat) {
+        return redirect()->back()->with('error_message', 'Cette vente est déjà validée.');
+    }
 
-        // 2. Vérifier et mettre à jour le stock pour chaque produit
+    DB::transaction(function () use ($vente) {
+        $produitsVendus = Vendre::where('vte_id', $vente->id)->get();
+
         foreach ($produitsVendus as $item) {
-            $produit = \App\Models\Produit::find($item->pro_id);
+            $produit = Produit::lockForUpdate()->find($item->pro_id);
 
             if ($produit) {
-                // Vérification optionnelle : est-ce qu'on a assez de stock ?
                 if ($produit->pro_stock < $item->vdr_qte) {
-                    return redirect()->back()->with('error_message', "Stock insuffisant pour le produit : " . $produit->pro_nom);
+                    throw new \Exception("Stock insuffisant pour le produit : " . $produit->pro_nom);
                 }
 
-                // Soustraction du stock
                 $produit->pro_stock -= $item->vdr_qte;
                 $produit->save();
             }
         }
 
-        // 3. Passer l'état de la vente à true (validé)
         $vente->vte_etat = true;
         $vente->save();
+    });
 
-        return redirect()->route('ventes.index', ['details' => $id])
-            ->with('success_message', 'Vente validée et stock mis à jour avec succès !');
-    }
+    return redirect()->route('ventes.index', ['details' => $id])
+        ->with('success_message', 'Vente validée et stock mis à jour avec succès !');
+}
 
 public function recuPaiement($id)
     {

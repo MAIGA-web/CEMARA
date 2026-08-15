@@ -42,50 +42,53 @@
                                         <th>Vétérinaire</th>
                                         <th>Poulailler</th>
                                         <th>État</th>
-                                        <th>Action</th>
+                                        <th class="text-center">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach ($vaccinations as $index => $vac)
+                                        @php
+                                            // Vérification si la vaccination est validée (gestion booléen PostgreSQL 't'/true/1)
+                                            $isValide = ($vac->vac_etat === 't' || $vac->vac_etat == 1 || $vac->vac_etat === true);
+                                        @endphp
                                         <tr>
                                             <td>{{ $index + 1 }}</td>
-                                            <td>{{ $vac->created_at }}</td>
+                                            <td>{{ \Carbon\Carbon::parse($vac->created_at)->format('d/m/Y H:i') }}</td>
                                             <td>{{ $vac->produit->pro_nom ?? 'N/A' }}</td>
                                             <td>{{ $vac->vac_qte }} Flacons</td>
-                                            <td>{{ ($vac->veterinaire->vtr_nom ?? '') . ' ' . ($vac->veterinaire->vtr_prenom ?? '') }}
-                                            </td>
+                                            <td>{{ trim(($vac->veterinaire->vtr_nom ?? '') . ' ' . ($vac->veterinaire->vtr_prenom ?? '')) ?: 'N/A' }}</td>
                                             <td>{{ $vac->poulailler->poul_nom ?? 'N/A' }}</td>
                                             <td>
                                                 {{-- Affichage de l'état textuel --}}
-                                                @if ($vac->vac_etat == 't')
-                                                    <span class="text-success"><i class="fa fa-check-circle"></i>
-                                                        Validé</span>
+                                                @if ($isValide)
+                                                    <span class="badge badge-success"><i class="fa fa-check-circle"></i> Validé</span>
                                                 @else
-                                                    <span class="text-warning"><i class="fa fa-clock-o"></i> En
-                                                        attente</span>
+                                                    <span class="badge badge-warning"><i class="fa fa-clock-o"></i> En attente</span>
                                                 @endif
                                             </td>
-                                            <td>
-                                                {{-- CONDITION CORRIGÉE : Si l'état n'est PAS validé (donc false, 0 ou 'f') --}}
-                                                @if ($vac->vac_etat == 0)
+                                            <td class="text-center" style="white-space: nowrap;">
+                                                {{-- Visible pour TOUS si non validé, OU uniquement pour l'ADMIN (user_etat == 1) si validé --}}
+                                                @if (!$isValide || Auth::user()->user_etat == 1)
+
+                                                    {{-- Bouton de validation rapide (masqué si déjà validé) --}}
+                                                    @if (!$isValide)
+                                                        <form method="POST" action="{{ url('/Vaccinations') }}" style="display:inline;">
+                                                            @csrf
+                                                            <input type="hidden" name="emp" value="V">
+                                                            <input type="hidden" name="vac_id" value="{{ $vac->id }}">
+                                                            <button type="submit" name="valider" value="Oui"
+                                                                class="btn btn-sm btn-success" title="Valider définitivement"
+                                                                onclick="return confirm('Valider cette vaccination et déduire le stock définitif ?')">
+                                                                <i class="fa fa-check"></i>
+                                                            </button>
+                                                        </form>
+                                                    @endif
+
                                                     <!-- Bouton Modifier -->
                                                     <a href="{{ url('/Vaccinations/add-edit/' . $vac->id) }}"
-                                                        class="btn btn-sm btn-primary" title="Modifier">
-                                                        <i class="fa fa-pencil"></i>
+                                                        class="btn btn-sm btn-warning" title="Modifier">
+                                                        <i class="fa fa-pencil text-white"></i>
                                                     </a>
-
-                                                    <!-- Bouton de validation rapide -->
-                                                    <form method="POST" action="{{ url('/Vaccinations') }}"
-                                                        style="display:inline;">
-                                                        @csrf
-                                                        <input type="hidden" name="emp" value="V">
-                                                        <input type="hidden" name="vac_id" value="{{ $vac->id }}">
-                                                        <button type="submit" name="valider" value="Oui"
-                                                            class="btn btn-sm btn-success" title="Valider définitivement"
-                                                            onclick="return confirm('Valider cette vaccination et déduire le stock définitif ?')">
-                                                            <i class="fa fa-check"></i>
-                                                        </button>
-                                                    </form>
 
                                                     <!-- Bouton Supprimer -->
                                                     <form method="POST" action="{{ url('/Vaccinations') }}"
@@ -99,10 +102,10 @@
                                                             <i class="fa fa-trash"></i>
                                                         </button>
                                                     </form>
+
                                                 @else
-                                                    {{-- Si la ligne est validée, on cache les boutons et on met le badge de confirmation --}}
-                                                    <i class="fa fa-lock text-muted" title="Vaccination verrouillée">
-                                                        Vaccination verrouillée</i>
+                                                    {{-- Si validé ET utilisateur non-admin --}}
+                                                    <i class="fa fa-lock text-muted" title="Vaccination verrouillée"> Verrouillée</i>
                                                 @endif
                                             </td>
                                         </tr>
@@ -116,6 +119,5 @@
 
             </div>
         </div><!-- .animated -->
-    </div>
     </div>
 @endsection

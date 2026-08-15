@@ -44,11 +44,9 @@
                                                 $isEstSelectionne = request('prd_id') == $p->id;
                                             @endphp
 
-                                            {{-- On applique un fond léger (table-primary) à toute la ligne si elle est sélectionnée --}}
                                             <tr class="{{ $isEstSelectionne ? 'table-primary font-weight-bold' : '' }}">
                                                 <td>{{ $i++ }}</td>
                                                 <td>
-                                                    {{-- Le bouton du poulailler passe en bleu foncé (btn-primary) s'il est sélectionné --}}
                                                     <a href="{{ route('production.index', ['prd_id' => $p->id]) }}"
                                                         class="btn btn-sm {{ $isEstSelectionne ? 'btn-primary shadow' : 'btn-info' }}"
                                                         title="Détails & Consommations">
@@ -61,46 +59,49 @@
                                                 <td>{{ $p->created_at->format('d/m/Y') }}</td>
                                                 <td><strong>{{ number_format($p->nbr_ouef, 0, ',', ' ') }}</strong></td>
                                                 <td class="text-center">
-                                                    @if ($p->prodc_etat == 1)
-                                                        {{-- Si la Production est validée --}}
-                                                        <span class="badge badge-success">
-                                                            <i class="fa fa-check"></i> Clôturée
-                                                        </span>
-                                                    @else
-                                                        {{-- Si la Production est modifiable --}}
-                                                        <form action="{{ route('production.action') }}" method="POST"
-                                                            style="display:inline;">
-                                                            @csrf
-                                                            <input type="hidden" name="emp" value="PRV">
-                                                            <input type="hidden" name="prd_id"
-                                                                value="{{ $p->id }}">
-                                                            <input type="hidden" name="fer_id"
-                                                                value="{{ $p->fer_id }}">
-                                                            <button type="submit" name="valider" value="Oui"
-                                                                class="btn btn-sm btn-success"
-                                                                onclick="return confirm('Valider et mouvementer définitivement les stocks pour cette production ?')"
-                                                                title="Valider la production">
-                                                                <i class="fa fa-check-square-o"></i>
-                                                            </button>
+                                                    @if (!$p->prodc_etat || Auth::user()->user_etat == 1)
+                                                        {{-- Si non validé OU si Admin (user_etat = 1) --}}
+                                                        @if (!$p->prodc_etat)
+                                                            {{-- Bouton de validation rapide (si pas encore validé) --}}
+                                                            <form action="{{ route('production.action') }}" method="POST" style="display:inline;">
+                                                                @csrf
+                                                                <input type="hidden" name="emp" value="PRV">
+                                                                <input type="hidden" name="prd_id" value="{{ $p->id }}">
+                                                                <input type="hidden" name="fer_id" value="{{ $p->fer_id }}">
+                                                                <button type="submit" name="valider" value="Oui"
+                                                                    class="btn btn-sm btn-success"
+                                                                    onclick="return confirm('Valider et mouvementer définitivement les stocks pour cette production ?')"
+                                                                    title="Valider la production">
+                                                                    <i class="fa fa-check-square-o"></i>
+                                                                </button>
+                                                            </form>
+                                                              @else<span class="badge badge-success"><i class="fa fa-check"></i> Validé</span>
+                                                        @endif
 
-                                                        </form>
-                                                        {{-- Bouton Édition : s'adapte aussi si on est déjà en mode édition sur cette fiche --}}
+
+                                                        {{-- Bouton Édition --}}
                                                         <a href="{{ route('production.create', $p->id) }}"
-                                                            class="btn btn-sm btn-warning">
+                                                            class="btn btn-sm btn-warning" title="Modifier">
                                                             <i class="fa fa-pencil text-white"></i>
                                                         </a>
-                                                        <form action="{{ route('production.action') }}" method="POST"
-                                                            style="display:inline;">
+
+                                                        {{-- Bouton Suppression --}}
+                                                        <form action="{{ route('production.action') }}" method="POST" style="display:inline;">
                                                             @csrf
                                                             <input type="hidden" name="emp" value="D">
-                                                            <input type="hidden" name="prd_id"
-                                                                value="{{ $p->id }}">
+                                                            <input type="hidden" name="prd_id" value="{{ $p->id }}">
                                                             <button type="submit" name="valider" value="Oui"
                                                                 class="btn btn-sm btn-danger"
-                                                                onclick="return confirm('Supprimer définitivement cette fiche de production ?')">
+                                                                onclick="return confirm('Supprimer définitivement cette fiche de production ?')"
+                                                                title="Supprimer">
                                                                 <i class="fa fa-trash"></i>
                                                             </button>
                                                         </form>
+                                                    @else
+                                                        {{-- Production clôturée et utilisateur standard --}}
+                                                        <span class="badge badge-success">
+                                                            <i class="fa fa-check"></i> Clôturée
+                                                        </span>
                                                     @endif
                                                 </td>
                                             </tr>
@@ -141,7 +142,7 @@
                                     </li>
                                     <li class="nav-item">
                                         <a class="nav-link" id="pills-profile-tab" data-toggle="pill" href="#pills-profile"
-                                            role="tab" aria-selected="false">Materiaux / Aliments Consommés
+                                            role="tab" aria-selected="false">Matériaux / Aliments Consommés
                                             ({{ $produires->count() }})</a>
                                     </li>
                                 </ul>
@@ -161,8 +162,7 @@
                                             </li>
                                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                                 Statut de validation :
-                                                <span
-                                                    class="badge badge-{{ $prd->prodc_etat ? 'success' : 'warning' }} badge-pill">
+                                                <span class="badge badge-{{ $prd->prodc_etat ? 'success' : 'warning' }} badge-pill">
                                                     {{ $prd->prodc_etat ? 'Validé (Stock mis à jour)' : 'En attente de validation' }}
                                                 </span>
                                             </li>
@@ -170,13 +170,11 @@
                                                 Durée du cycle de production :
                                                 <strong>{{ $prd->prodc_dure }} Jours</strong>
                                             </li>
-                                            <li
-                                                class="list-group-item d-flex justify-content-between align-items-center text-primary">
+                                            <li class="list-group-item d-flex justify-content-between align-items-center text-primary">
                                                 Œufs récoltés (nbr_ouef) :
                                                 <strong>{{ number_format($prd->nbr_ouef, 0, ',', ' ') }} Œufs</strong>
                                             </li>
-                                            <li
-                                                class="list-group-item d-flex justify-content-between align-items-center text-secondary">
+                                            <li class="list-group-item d-flex justify-content-between align-items-center text-secondary">
                                                 Total général des œufs en stock :
                                                 <strong>{{ number_format($max_oeuf_stock, 0, ',', ' ') }} Œufs</strong>
                                             </li>
@@ -196,51 +194,19 @@
                                     {{-- =================================================================== --}}
                                     <div class="tab-pane fade" id="pills-profile" role="tabpanel">
 
-                                        {{-- Formulaire pour ajouter une ligne de consommation (si non clôturé) --}}
-                                        @if (!$prd->prodc_etat)
-                                            <h5 class="mb-3 text-primary">Selectionner une produiction</h5>
-
-                                            {{-- Utilisation de ta route unique storeAction avec l'identifiant 'PU' ou 'C' selon tes besoins --}}
-                                            {{-- <form action="{{ route('production.action') }}" method="POST"
-                                                class="form-inline mb-4 p-3 bg-light rounded" style="gap: 10px;">
-                                                @csrf
-                                                <input type="hidden" name="emp" value="C">
-                                                Déclenche l'ajout/composants
-                                                <input type="hidden" name="prd_id" value="{{ $prd->id }}">
-                                                <input type="hidden" name="nbr_ouef" value="{{ $prd->nbr_ouef }}">
-                                                <input type="hidden" name="poul_id" value="{{ $prd->poul_id }}">
-                                                <input type="hidden" name="prodc_dure" value="{{ $prd->prodc_dure }}">
-
-                                                <select name="pro_id" class="form-control form-control-sm" required
-                                                    style="flex: 2;">
-                                                    <option value="">-- Choisir l'aliment ou vaccin --</option>
-                                                    @foreach ($produits as $p)
-                                                        pro_etat = 0 représentent les intrants/aliments consommés
-                                                        @if ($p->pro_etat == 0)
-                                                            <option value="{{ $p->id }}">{{ $p->pro_nom }}
-                                                                ({{ $p->pro_type }}) (Stock dispos: {{ $p->pro_stock }})
-                                                            </option>
-                                                        @endif
-                                                    @endforeach
-                                                </select>
-
-                                                <input type="number" step="0.01" name="cprd_qte"
-                                                    class="form-control form-control-sm" placeholder="Quantité Utilisée"
-                                                    required style="flex: 1; max-width: 150px;">
-
-                                                <button type="submit" name="valider" value="Valider"
-                                                    class="btn btn-sm btn-success">
-                                                    <i class="fa fa-plus"></i> Insérer
-                                                </button>
-                                            </form> --}}
+                                        @if (!$prd->prodc_etat || Auth::user()->user_etat == 1)
+                                            {{-- Autorisé si non validé OU si Administrateur --}}
+                                            @if ($prd->prodc_etat)
+                                                <div class="alert alert-warning py-2 mb-3">
+                                                    <i class="fa fa-exclamation-triangle"></i> Mode Administrateur : Vous modifiez une production déjà clôturée.
+                                                </div>
+                                            @endif
                                         @else
                                             <div class="alert alert-info">
-                                                <i class="fa fa-lock"></i> Cette production est clôturée. Les consommations
-                                                associées sont verrouillées.
+                                                <i class="fa fa-lock"></i> Cette production est clôturée. Seul un administrateur peut modifier les consommations associées.
                                             </div>
                                         @endif
 
-                                        <hr>
                                         <h5 class="mb-3">Détails des consommations réelles</h5>
                                         <div class="table-responsive">
                                             <table class="table table-sm table-striped table-bordered">
@@ -250,9 +216,7 @@
                                                         <th>Intrant / Produit</th>
                                                         <th>Type</th>
                                                         <th>Quantité Consommée</th>
-                                                        @if (!$prd->prodc_etat)
-                                                            <th class="text-center">Action</th>
-                                                        @endif
+                                                        <th class="text-center">Action</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -263,34 +227,28 @@
                                                             <td>{{ $pv->produit->pro_nom ?? 'Inconnu' }}</td>
                                                             <td>{{ $pv->produit->pro_type ?? 'N/A' }}</td>
                                                             <td><strong>{{ $pv->prdr_qte }}</strong></td>
-
-                                                            @if (!$prd->prodc_etat)
-                                                                <td class="text-center">
-                                                                    {{-- Formulaire de modification rapide de quantité (Case PU de ton controleur) --}}
-                                                                    <form action="{{ route('production.action') }}"
-                                                                        method="POST" class="d-inline">
+                                                            <td class="text-center">
+                                                                @if (!$prd->prodc_etat || Auth::user()->user_etat == 1)
+                                                                    {{-- Formulaire de mise à jour rapide visible par tous avant validation, ou uniquement admin après --}}
+                                                                    <form action="{{ route('production.action') }}" method="POST" class="d-inline">
                                                                         @csrf
-                                                                        <input type="hidden" name="emp"
-                                                                            value="PU">
-                                                                        <input type="hidden" name="cprd_id"
-                                                                            value="{{ $pv->id }}">
-                                                                        <input type="number" name="prdr_qte"
-                                                                            value="{{ $pv->prdr_qte }}" step="0.01"
-                                                                            style="width:60px; font-size:12px;" required>
-                                                                        <button type="submit" name="valider"
-                                                                            value="Valider" class="btn btn-xs btn-warning"
-                                                                            title="Mettre à jour la qte">
+                                                                        <input type="hidden" name="emp" value="PU">
+                                                                        <input type="hidden" name="cprd_id" value="{{ $pv->id }}">
+                                                                        <input type="number" name="prdr_qte" value="{{ $pv->prdr_qte }}"
+                                                                            step="0.01" style="width:70px; font-size:12px;" required>
+                                                                        <button type="submit" name="valider" value="Valider"
+                                                                            class="btn btn-xs btn-warning" title="Mettre à jour la quantité">
                                                                             <i class="fa fa-edit text-white"></i>
                                                                         </button>
                                                                     </form>
-                                                                </td>
-                                                            @endif
+                                                                @else
+                                                                    <i class="fa fa-lock text-muted" title="Consommation verrouillée"></i>
+                                                                @endif
+                                                            </td>
                                                         </tr>
                                                     @empty
                                                         <tr>
-                                                            <td colspan="5" class="text-center text-muted">Aucun
-                                                                intrant ou aliment n'est enregistré pour cette session de
-                                                                production.</td>
+                                                            <td colspan="5" class="text-center text-muted">Aucun intrant ou aliment n'est enregistré pour cette session de production.</td>
                                                         </tr>
                                                     @endforelse
                                                 </tbody>
@@ -302,12 +260,11 @@
                             </div> {{-- Fin card-body --}}
                         </div> {{-- Fin card --}}
                     @else
-                        {{-- État initial si aucune production n'est cliquée --}}
+                        {{-- État initial si aucune production n'est sélectionnée --}}
                         <div class="card">
                             <div class="card-body text-center py-5">
                                 <i class="fa fa-cubes fa-4x text-muted mb-3"></i>
-                                <h4 class="text-muted">Sélectionnez une fiche de production à gauche pour analyser ses
-                                    consommations et détails.</h4>
+                                <h4 class="text-muted">Sélectionnez une fiche de production à gauche pour analyser ses consommations et détails.</h4>
                             </div>
                         </div>
                     @endif

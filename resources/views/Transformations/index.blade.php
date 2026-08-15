@@ -39,7 +39,7 @@
                                     <tbody>
                                         @forelse ($transformations as $key => $t)
                                             @php
-                                                // 🟢 On vérifie si cette transformation est celle sélectionnée dans l'URL
+                                                //  On vérifie si cette transformation est celle sélectionnée dans l'URL
                                                 $isEstSelectionne = request('trans_id') == $t->id;
                                             @endphp
 
@@ -60,24 +60,26 @@
                                                 </td>
                                                 <td>{{ number_format($t->trans_qte, 2, ',', ' ') }}</td>
                                                 <td class="text-center" style="white-space: nowrap;">
-                                                    @if ($t->trans_etat == 1)
-                                                        <span class="badge badge-success">
-                                                            <i class="fa fa-check"></i> Validée
-                                                        </span>
-                                                    @else
-                                                        {{-- Bouton Valider --}}
-                                                        <form action="{{ url('/Transformations/store') }}" method="POST"
-                                                            style="display:inline;">
-                                                            @csrf
-                                                            <input type="hidden" name="emp" value="PRV">
-                                                            <input type="hidden" name="trans_id"
-                                                                value="{{ $t->id }}">
-                                                            <button type="submit" class="btn btn-sm btn-success"
-                                                                onclick="return confirm('Valider et déduire définitivement les stocks ?')"
-                                                                title="Valider la transformation">
-                                                                <i class="fa fa-check-square-o"></i>
-                                                            </button>
-                                                        </form>
+                                                    @if (!$t->trans_etat || Auth::user()->user_etat == 1)
+                                                        {{-- Disponible pour TOUS si non validé, OU uniquement pour l'ADMIN si déjà validé --}}
+                                                        
+                                                        @if (!$t->trans_etat)
+                                                            {{-- Bouton Valider (Visible uniquement si non validé) --}}
+                                                            <form action="{{ url('/Transformations/store') }}" method="POST" style="display:inline;">
+                                                                @csrf
+                                                                <input type="hidden" name="emp" value="PRV">
+                                                                <input type="hidden" name="trans_id" value="{{ $t->id }}">
+                                                                <button type="submit" class="btn btn-sm btn-success"
+                                                                    onclick="return confirm('Valider et déduire définitivement les stocks ?')"
+                                                                    title="Valider la transformation">
+                                                                    <i class="fa fa-check-square-o"></i>
+                                                                </button>
+                                                            </form>
+                                                        @else
+                                                            <span class="badge badge-success mr-1">
+                                                                <i class="fa fa-check"></i> Validée
+                                                            </span>
+                                                        @endif
 
                                                         {{-- Bouton Modifier --}}
                                                         <a href="{{ url('/Transformations/add-edit/' . $t->id) }}"
@@ -92,21 +94,24 @@
                                                             onsubmit="return confirm('Supprimer cette transformation ainsi que ses rendements ?')">
                                                             @csrf
                                                             <input type="hidden" name="emp" value="D">
-                                                            <input type="hidden" name="trans_id"
-                                                                value="{{ $t->id }}">
+                                                            <input type="hidden" name="trans_id" value="{{ $t->id }}">
                                                             <button type="submit" class="btn btn-sm btn-danger"
                                                                 title="Supprimer">
                                                                 <i class="fa fa-trash"></i>
                                                             </button>
                                                         </form>
+                                                    @else
+                                                        {{-- Si l'opération est validée ET l'utilisateur n'est PAS admin --}}
+                                                        <span class="badge badge-success">
+                                                            <i class="fa fa-check"></i> Validée
+                                                        </span>
                                                     @endif
                                                 </td>
                                             </tr>
                                         @empty
-                                            {{-- <tr> --}}
-                                                <span colspan="4" class="text-center text-muted py-3">Aucune transformation
-                                                    enregistrée.</span>
-                                            {{-- </tr> --}}
+                                            <tr>
+                                                <td colspan="4" class="text-center text-muted py-3">Aucune transformation enregistrée.</td>
+                                            </tr>
                                         @endforelse
                                     </tbody>
                                 </table>
@@ -195,6 +200,10 @@
                                                 <i class="fa fa-info-circle"></i> Les rendements théoriques sont
                                                 pré-calculés à 97%. Ajustez-les ci-dessous avant validation.
                                             </div>
+                                        @elseif(Auth::user()->user_etat == 1)
+                                            <div class="alert alert-warning py-2">
+                                                <i class="fa fa-exclamation-triangle"></i> Mode Administrateur : Vous modifiez les rendements d'une transformation déjà clôturée.
+                                            </div>
                                         @else
                                             <div class="alert alert-secondary">
                                                 <i class="fa fa-lock"></i> Opération clôturée. Les rendements réels de
@@ -211,9 +220,7 @@
                                                         <th>Produit Fini</th>
                                                         <th>Type</th>
                                                         <th>Quantité Réelle</th>
-                                                        @if (!$transformation_selectionnee->trans_etat)
-                                                            <th class="text-center">Statut</th>
-                                                        @endif
+                                                        <th class="text-center">Statut</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -225,15 +232,13 @@
                                                             <td>{{ $lt->produit->pro_nom ?? 'N/A' }}</td>
                                                             <td>{{ $lt->produit->pro_type ?? 'N/A' }}</td>
                                                             <td>
-                                                                @if (!$transformation_selectionnee->trans_etat)
-                                                                    {{-- Formulaire d'ajustement réaligné sur la méthode store (Case PU) --}}
+                                                                @if (!$transformation_selectionnee->trans_etat || Auth::user()->user_etat == 1)
+                                                                    {{-- Permet la modification avant validation pour tous, et après validation seulement pour l'admin --}}
                                                                     <form action="{{ url('/Transformations/store') }}"
                                                                         method="POST" class="form-inline d-inline-block">
                                                                         @csrf
-                                                                        <input type="hidden" name="emp"
-                                                                            value="PU">
-                                                                        <input type="hidden" name="trm_id"
-                                                                            value="{{ $lt->id }}">
+                                                                        <input type="hidden" name="emp" value="PU">
+                                                                        <input type="hidden" name="trm_id" value="{{ $lt->id }}">
 
                                                                         <input type="number" step="0.01"
                                                                             name="trme_qte"
@@ -249,16 +254,16 @@
                                                                         </button>
                                                                     </form>
                                                                 @else
-                                                                    <strong>{{ number_format($lt->trme_qte, 2, ',', ' ') }}
-                                                                        Kg</strong>
+                                                                    <strong>{{ number_format($lt->trme_qte, 2, ',', ' ') }} Kg</strong>
                                                                 @endif
                                                             </td>
-                                                            @if (!$transformation_selectionnee->trans_etat)
-                                                                <td class="text-center">
-                                                                    <span class="text-success"><i
-                                                                            class="fa fa-unlock"></i> Libre</span>
-                                                                </td>
-                                                            @endif
+                                                            <td class="text-center">
+                                                                @if (!$transformation_selectionnee->trans_etat || Auth::user()->user_etat == 1)
+                                                                    <span class="text-success"><i class="fa fa-unlock"></i> Éditable</span>
+                                                                @else
+                                                                    <span class="text-muted"><i class="fa fa-lock"></i> Verrouillé</span>
+                                                                @endif
+                                                            </td>
                                                         </tr>
                                                     @empty
                                                         <tr>

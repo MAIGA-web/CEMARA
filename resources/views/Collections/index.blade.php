@@ -69,21 +69,27 @@
                                                 @endif
                                             </td>
                                             <td>
-                                                @if ($col->col_etat == 0)
+                                                {{-- Visible par tous si non validé, ou réservé à l'Admin (user_etat == 1) si déjà validé --}}
+                                                @if ($col->col_etat == 0 || Auth::user()->user_etat == 1)
                                                     <a href="{{ url('/Collections?acc=U&col_id=' . $col->id) }}"
                                                         class="btn btn-sm btn-primary" title="Modifier l'en-tête"><i
                                                             class="fa fa-pencil"></i></a>
 
-                                                    <form method="POST" action="{{ url('/Collections') }}"
-                                                        style="display:inline;">
-                                                        @csrf
-                                                        <input type="hidden" name="emp" value="CV">
-                                                        <input type="hidden" name="col_id" value="{{ $col->id }}">
-                                                        <button type="submit" name="valider" value="Oui"
-                                                            class="btn btn-sm btn-success" title="Valider définitivement"
-                                                            onclick="return confirm('Valider le ramassage et injecter le reste au stock ?')"><i
-                                                                class="fa fa-check"></i></button>
-                                                    </form>
+                                                    {{-- Le bouton de validation reste masqué si déjà validé --}}
+                                                    @if ($col->col_etat == 0)
+                                                        <form method="POST" action="{{ url('/Collections') }}"
+                                                            style="display:inline;">
+                                                            @csrf
+                                                            <input type="hidden" name="emp" value="CV">
+                                                            <input type="hidden" name="col_id" value="{{ $col->id }}">
+                                                            <button type="submit" name="valider" value="Oui"
+                                                                class="btn btn-sm btn-success" title="Valider définitivement"
+                                                                onclick="return confirm('Valider le ramassage et injecter le reste au stock ?')"><i
+                                                                    class="fa fa-check"></i></button>
+                                                        </form>
+                                                        @else  <span class="badge badge-success"><i class="fa fa-lock"></i>
+                                                        Validé</span>
+                                                    @endif
 
                                                     <form method="POST" action="{{ url('/Collections') }}"
                                                         style="display:inline;">
@@ -111,7 +117,7 @@
                             <div class="card-header bg-dark text-white">
                                 <strong>Détails du ramassage du :
                                     {{ $collectionSelectionnee->created_at->format('d/m/Y') }}</strong>
-                                @if ($collectionSelectionnee->col_etat == 0)
+                                @if ($collectionSelectionnee->col_etat == 0 || Auth::user()->user_etat == 1)
                                     <button class="btn btn-sm btn-primary float-right" data-toggle="collapse"
                                         data-target="#formCollecter">
                                         <i class="fa fa-plus"></i> Ajouter un lot
@@ -120,7 +126,7 @@
                             </div>
 
                             <div class="card-body">
-                                @if ($collectionSelectionnee->col_etat == 0)
+                                @if ($collectionSelectionnee->col_etat == 0 || Auth::user()->user_etat == 1)
                                     <div id="formCollecter" class="collapse p-3 mb-3 bg-light border rounded">
                                         @include('Collections.partials.create')
                                     </div>
@@ -133,7 +139,7 @@
                                             <th>Cassés</th>
                                             <th>Consommés</th>
                                             <th>Restes</th>
-                                            @if ($collectionSelectionnee->col_etat == 0)
+                                            @if ($collectionSelectionnee->col_etat == 0 || Auth::user()->user_etat == 1)
                                                 <th>Actions</th>
                                             @endif
                                         </tr>
@@ -149,7 +155,7 @@
                                                 <td><strong class="text-danger">{{ $item->qte_casse }}</strong></td>
                                                 <td><strong class="text-warning">{{ $item->qte_consomme }}</strong></td>
                                                 <td><strong class="text-success">{{ $reste }}</strong></td>
-                                                @if ($collectionSelectionnee->col_etat == 0)
+                                                @if ($collectionSelectionnee->col_etat == 0 || Auth::user()->user_etat == 1)
                                                     <td>
                                                         <a href="{{ url('/Collections?acc=AM&coll_id=' . $item->id . '&col_id=' . $collectionSelectionnee->id) }}"
                                                             class="btn btn-sm btn-primary"><i class="fa fa-pencil"></i></a>
@@ -195,6 +201,5 @@
             @endif
 
         </div>
-    </div>
     </div>
 @endsection

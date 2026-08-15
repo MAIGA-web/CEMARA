@@ -62,20 +62,24 @@
                                                 @endif
                                             </td>
                                             <td>
-                                                @if ($per->per_etat == 0)
+                                                {{-- Visible avant validation pour tous OU après validation si user_etat = 1 --}}
+                                                @if ($per->per_etat == 0 || Auth::user()->user_etat == 1)
                                                     <a href="{{ url('/Pertes?acc=M&per_id=' . $per->id) }}"
                                                         class="btn btn-sm btn-primary"><i class="fa fa-pencil"></i></a>
 
-                                                    <form method="POST" action="{{ url('/Pertes') }}"
-                                                        style="display:inline;">
-                                                        @csrf
-                                                        <input type="hidden" name="emp" value="PV">
-                                                        <input type="hidden" name="per_id" value="{{ $per->id }}">
-                                                        <button type="submit" name="valider" value="Oui"
-                                                            class="btn btn-sm btn-success"
-                                                            onclick="return confirm('Valider et déduire définitivement les stocks ?')"><i
-                                                                class="fa fa-check"></i></button>
-                                                    </form>
+                                                    {{-- Le bouton de validation reste masqué si la fiche est déjà validée --}}
+                                                    @if ($per->per_etat == 0)
+                                                        <form method="POST" action="{{ url('/Pertes') }}"
+                                                            style="display:inline;">
+                                                            @csrf
+                                                            <input type="hidden" name="emp" value="PV">
+                                                            <input type="hidden" name="per_id" value="{{ $per->id }}">
+                                                            <button type="submit" name="valider" value="Oui"
+                                                                class="btn btn-sm btn-success"
+                                                                onclick="return confirm('Valider et déduire définitivement les stocks ?')"><i
+                                                                    class="fa fa-check"></i></button>
+                                                        </form>
+                                                    @endif
 
                                                     <form method="POST" action="{{ url('/Pertes') }}"
                                                         style="display:inline;">
@@ -103,7 +107,7 @@
                             <div class="card-header bg-dark text-white">
                                 <strong>Produits de la Fiche du :
                                     {{ $perteSelectionnee->created_at->format('d/m/Y') }}</strong>
-                                @if ($perteSelectionnee->per_etat == 0)
+                                @if ($perteSelectionnee->per_etat == 0 || Auth::user()->user_etat == 1)
                                     <button class="btn btn-sm btn-primary float-right" data-toggle="collapse"
                                         data-target="#formPerdre">
                                         <i class="fa fa-plus"></i> Déclarer Perte
@@ -112,7 +116,7 @@
                             </div>
 
                             <div class="card-body">
-                                @if ($perteSelectionnee->per_etat == 0)
+                                @if ($perteSelectionnee->per_etat == 0 || Auth::user()->user_etat == 1)
                                     <div id="formPerdre" class="collapse p-3 mb-3 bg-light border rounded">
                                         @include('Pertes.partials.create')
                                     </div>
@@ -124,7 +128,7 @@
                                             <th>Produit</th>
                                             <th>Qté</th>
                                             <th>Motif</th>
-                                            @if ($perteSelectionnee->per_etat == 0)
+                                            @if ($perteSelectionnee->per_etat == 0 || Auth::user()->user_etat == 1)
                                                 <th>Actions</th>
                                             @endif
                                         </tr>
@@ -135,7 +139,7 @@
                                                 <td>{{ $item->produit->pro_nom }}</td>
                                                 <td><strong class="text-danger">{{ $item->perd_qte }}</strong></td>
                                                 <td><strong>{{ $item->motif ?? 'Non spécifié' }}</strong></td>
-                                                @if ($perteSelectionnee->per_etat == 0)
+                                                @if ($perteSelectionnee->per_etat == 0 || Auth::user()->user_etat == 1)
                                                     <td>
                                                         <a href="{{ url('/Pertes?acc=AM&perd_id=' . $item->id . '&per_id=' . $perteSelectionnee->id) }}"
                                                             class=" btn btn-primary mr-2"><i class="fa fa-edit"></i></a>
