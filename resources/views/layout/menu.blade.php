@@ -65,7 +65,7 @@
     <div id="main-menu" class="main-menu collapse navbar-collapse">
         <ul class="nav navbar-nav">
             <li class="active">
-                <a href="{{ route('dashboard') }}"><i class="menu-icon fa fa-laptop"></i>Home </a>
+                <a href="{{ route('dashboard') }}"><i class="menu-icon fa fa-laptop"></i>{{ $ferme_selectionnee->fer_nom ?? session('fer_nom', 'Aucune ferme') }} </a>
             </li>
             <li class="menu-title"> Menu </li><!-- /.menu-title -->
             {{-- @php

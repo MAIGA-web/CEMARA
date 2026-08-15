@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         body {
-            background: linear-gradient(135deg, #078697 0%, #035964 100%);
+           background:  url("{{ asset('images/poules.png') }}") center/cover no-repeat fixed;
             font-family: 'Poppins', sans-serif;
             height: 100vh;
             display: flex;
@@ -92,7 +92,7 @@
     <div class="login-card">
         <div class="text-center mb-4">
             <div style="background: #18828a; width: 60px; height: 60px; border-radius: 15px; display: inline-flex; align-items: center; justify-content: center; color: white; font-size: 30px; font-weight: bold;">
-                C
+                CM
             </div>
         </div>
 
@@ -125,9 +125,9 @@
             <button type="submit" class="btn btn-login">Se connecter</button>
         </form>
 
-        <div class="footer-text">
+        {{-- <div class="footer-text">
             &copy; 2026 CEMARA Edu. Tous droits réservés.
-        </div>
+        </div> --}}
     </div>
 
 </body>

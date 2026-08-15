@@ -1,12 +1,9 @@
 @extends('layout.header')
-
 @section('contenu')
     <div class="content">
         <div class="animated fadeIn">
             <div class="row">
-
                 <div class="col-md-12">
-
                     <div class="card">
                         <div class="col-5">
                             @if (session('success_message'))
