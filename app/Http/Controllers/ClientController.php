@@ -19,6 +19,7 @@ class ClientController extends Controller
     }
     public function create(Request $request, $id = null)
     {
+        $fer_id = session('fer_id') ?? (auth()->user()->fer_id ?? null);
         if ($id == "") {
             $client = new Client;
         } else {
