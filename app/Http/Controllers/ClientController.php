@@ -35,7 +35,7 @@ class ClientController extends Controller
                     'required' , 'max:11',
                     // Si $id est nul (ajout), il vérifie l'unicité normalement
                     // Si $id existe (edit), il ignore cet ID dans la vérification
-                    Rule::unique('clients', 'cl_tel')->ignore($id)
+                    Rule::unique('clients', 'cl_tel')->ignore($id)->where('fer_id',$fer_id)
                 ],
             ], [
                 'cl_nom.required'    => 'Le nom est obligatoire',
