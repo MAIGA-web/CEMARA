@@ -1,5 +1,5 @@
 @extends('layout.header')
-
+@section('contenu')
 <div id="right-panel" class="right-panel">
     <div class="content">
         <div class="animated fadeIn">
@@ -102,3 +102,4 @@
         </div>
     </div>
 </div>
+@endsection
