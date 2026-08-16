@@ -37,82 +37,76 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @forelse ($transformations as $key => $t)
-                                            @php
-                                                //  On vérifie si cette transformation est celle sélectionnée dans l'URL
-                                                $isEstSelectionne = request('trans_id') == $t->id;
-                                            @endphp
+                                      @forelse ($transformations as $key => $t)
+    @php
+        $isEstSelectionne = request('trans_id') == $t->id;
+        $isSuperAdmin = Auth::user()->user_etat == 1;
+        $isValidated = (bool) $t->trans_etat;
+    @endphp
 
-                                            {{-- On applique la classe table-primary pour colorer la ligne sélectionnée --}}
-                                            <tr class="{{ $isEstSelectionne ? 'table-primary font-weight-bold' : '' }}">
-                                                <td>{{ $key + 1 }}</td>
-                                                <td>
-                                                    {{-- Le bouton de la matière première devient bleu foncé s'il est actif --}}
-                                                    <a href="{{ url('/Transformations?trans_id=' . $t->id) }}"
-                                                        class="btn btn-sm {{ $isEstSelectionne ? 'btn-primary shadow' : 'btn-info' }}"
-                                                        title="Voir les détails">
-                                                        @if ($isEstSelectionne)
-                                                            <i class="fa fa-arrow-circle-right mr-1"></i>
-                                                        @endif
-                                                        {{ $t->matiere->ma_nom ?? 'Matière inconnue' }}
-                                                        {{ $t->matiere->ma_type ?? '' }}
-                                                    </a>
-                                                </td>
-                                                <td>{{ number_format($t->trans_qte, 2, ',', ' ') }}</td>
-                                                <td class="text-center" style="white-space: nowrap;">
-                                                    @if (!$t->trans_etat || Auth::user()->user_etat == 1)
-                                                        {{-- Disponible pour TOUS si non validé, OU uniquement pour l'ADMIN si déjà validé --}}
-                                                        
-                                                        @if (!$t->trans_etat)
-                                                            {{-- Bouton Valider (Visible uniquement si non validé) --}}
-                                                            <form action="{{ url('/Transformations/store') }}" method="POST" style="display:inline;">
-                                                                @csrf
-                                                                <input type="hidden" name="emp" value="PRV">
-                                                                <input type="hidden" name="trans_id" value="{{ $t->id }}">
-                                                                <button type="submit" class="btn btn-sm btn-success"
-                                                                    onclick="return confirm('Valider et déduire définitivement les stocks ?')"
-                                                                    title="Valider la transformation">
-                                                                    <i class="fa fa-check-square-o"></i>
-                                                                </button>
-                                                            </form>
-                                                        @else
-                                                            <span class="badge badge-success mr-1">
-                                                                <i class="fa fa-check"></i> Validée
-                                                            </span>
-                                                        @endif
+    <tr class="{{ $isEstSelectionne ? 'table-primary font-weight-bold' : '' }}">
+        <td>{{ $key + 1 }}</td>
+        <td>
+            <a href="{{ url('/Transformations?trans_id=' . $t->id) }}"
+                class="btn btn-sm {{ $isEstSelectionne ? 'btn-primary shadow' : 'btn-info' }}"
+                title="Voir les détails">
+                @if ($isEstSelectionne)
+                    <i class="fa fa-arrow-circle-right mr-1"></i>
+                @endif
+                {{ $t->matiere->ma_nom ?? 'Matière inconnue' }}
+                {{ $t->matiere->ma_type ?? '' }}
+            </a>
+        </td>
+        <td>{{ number_format($t->trans_qte, 2, ',', ' ') }}</td>
+        <td class="text-center" style="white-space: nowrap;">
+            
+            {{-- CAS 1 : Non validée -> On affiche le bouton de validation --}}
+            @if (!$isValidated)
+                <form action="{{ url('/Transformations/store') }}" method="POST" style="display:inline;">
+                    @csrf
+                    <input type="hidden" name="emp" value="PRV">
+                    <input type="hidden" name="trans_id" value="{{ $t->id }}">
+                    <button type="submit" class="btn btn-sm btn-success"
+                        onclick="return confirm('Valider et déduire définitivement les stocks ?')"
+                        title="Valider la transformation">
+                        <i class="fa fa-check-square-o"></i>
+                    </button>
+                </form>
+            @else
+                {{-- CAS 2 : Déjà validée -> On affiche le badge Validée --}}
+                <span class="badge badge-success mr-1">
+                    <i class="fa fa-check"></i> Validée
+                </span>
+            @endif
 
-                                                        {{-- Bouton Modifier --}}
-                                                        <a href="{{ url('/Transformations/add-edit/' . $t->id) }}"
-                                                            class="btn btn-sm btn-warning"
-                                                            title="Modifier la quantité injectée">
-                                                            <i class="fa fa-pencil text-white"></i>
-                                                        </a>
+            {{-- Boutons Modifier & Supprimer : Visibles si NON validé OU si SUPER ADMIN --}}
+            @if (!$isValidated || $isSuperAdmin)
+                {{-- Bouton Modifier --}}
+                <a href="{{ url('/Transformations/add-edit/' . $t->id) }}"
+                    class="btn btn-sm btn-warning"
+                    title="Modifier la quantité injectée">
+                    <i class="fa fa-pencil text-white"></i>
+                </a>
 
-                                                        {{-- Formulaire de Suppression --}}
-                                                        <form action="{{ url('/Transformations/store') }}" method="POST"
-                                                            style="display:inline;"
-                                                            onsubmit="return confirm('Supprimer cette transformation ainsi que ses rendements ?')">
-                                                            @csrf
-                                                            <input type="hidden" name="emp" value="D">
-                                                            <input type="hidden" name="trans_id" value="{{ $t->id }}">
-                                                            <button type="submit" class="btn btn-sm btn-danger"
-                                                                title="Supprimer">
-                                                                <i class="fa fa-trash"></i>
-                                                            </button>
-                                                        </form>
-                                                    @else
-                                                        {{-- Si l'opération est validée ET l'utilisateur n'est PAS admin --}}
-                                                        <span class="badge badge-success">
-                                                            <i class="fa fa-check"></i> Validée
-                                                        </span>
-                                                    @endif
-                                                </td>
-                                            </tr>
-                                        @empty
-                                            <tr>
-                                                <td colspan="4" class="text-center text-muted py-3">Aucune transformation enregistrée.</td>
-                                            </tr>
-                                        @endforelse
+                {{-- Bouton Supprimer --}}
+                <form action="{{ url('/Transformations/store') }}" method="POST" style="display:inline;"
+                    onsubmit="return confirm('Supprimer cette transformation ainsi que ses rendements ?')">
+                    @csrf
+                    <input type="hidden" name="emp" value="D">
+                    <input type="hidden" name="trans_id" value="{{ $t->id }}">
+                    <button type="submit" class="btn btn-sm btn-danger" title="Supprimer">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                </form>
+            @endif
+
+        </td>
+    </tr>
+@empty
+    <tr>
+        <td colspan="4" class="text-center text-muted py-3">Aucune transformation enregistrée.</td>
+    </tr>
+@endforelse
                                     </tbody>
                                 </table>
                             </div>
