@@ -123,11 +123,11 @@
                         </div>
                         <div class="user-area dropdown">
                             <span>
-                                @if (auth()->user()->user_etat == 1)
+                                <!-- @if (auth()->user()->user_etat == 1)
                                     <span class="badge badge-danger">SUPER ADMIN</span>
                                 @else
                                     <span class="badge badge-info">ADMIN FERME</span>
-                                @endif
+                                @endif -->
                                 {{ auth()->user()->name }}
                             </span>
                             <!-- ... reste du menu -->
