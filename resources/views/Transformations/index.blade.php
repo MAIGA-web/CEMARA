@@ -103,9 +103,9 @@
         </td>
     </tr>
 @empty
-    <tr>
-        <td colspan="4" class="text-center text-muted py-3">Aucune transformation enregistrée.</td>
-    </tr>
+    
+        <span class="text-center text-muted py-3">Aucune transformation enregistrée.</span>
+    
 @endforelse
                                     </tbody>
                                 </table>
