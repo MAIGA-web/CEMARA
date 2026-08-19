@@ -130,7 +130,6 @@
                                 @endif -->
                                 {{ auth()->user()->name }}
                             </span>
-                            <!-- ... reste du menu -->
                         </div>
                     </div>
                     <div class="user-area dropdown float-right">
@@ -142,7 +141,7 @@
 
 
                             @if (!empty($fermeActive) && $fermeActive->fer_logo)
-                                <img src="{{ asset('images/' . $fermeActive->fer_logo) }}"
+                                <img src="{{ asset('storage/images/' . $fermeActive->fer_logo) }}"
                                     alt="Logo {{ $fermeActive->fer_nom }}" class="mr-2"
                                     style="height: 35px; width: 35px; border-radius: 50%; object-fit: cover; border: 1px solid #18828a;">
                             @else
