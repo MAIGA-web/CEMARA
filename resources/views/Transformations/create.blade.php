@@ -18,9 +18,9 @@
                         </div>
 
                         <div class="card-body p-4">
-                            @if (session('error'))
+                            @if (session('error_message'))
                                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                    <i class="fa fa-exclamation-triangle mr-2"></i> {{ session('error') }}
+                                    <i class="fa fa-exclamation-triangle mr-2"></i> {{ session('error_message') }}
                                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                                         <span aria-hidden="true">&times;</span>
                                     </button>

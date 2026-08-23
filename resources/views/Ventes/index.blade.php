@@ -36,71 +36,70 @@
                                             <th class="text-center">Action</th>
                                         </tr>
                                     </thead>
-<tbody>
-    @foreach ($ventes as $key => $v)
-        @php
-            $isEstSelectionne = request('details') == $v->id;
-            $currentUser = auth()->user();
-            $etatUser = $currentUser ? $currentUser->user_etat : 0; // Vérifie si c'est user_etat ou user_etat
+                                    <tbody>
+                                        @foreach ($ventes as $key => $v)
+                                            @php
+                                                $isEstSelectionne = request('details') == $v->id;
+                                                $currentUser = auth()->user();
+                                                $etatUser = $currentUser ? $currentUser->user_etat : 0; // Vérifie si c'est user_etat ou user_etat
 
-            // Condition clé : accessible si la vente N'EST PAS validée OR si l'utilisateur est admin (user_etat == 1)
-            $peutModifier = !$v->vte_etat || $etatUser == 1;
-        @endphp
+// Condition clé : accessible si la vente N'EST PAS validée OR si l'utilisateur est admin (user_etat == 1)
+                                                $peutModifier = !$v->vte_etat || $etatUser == 1;
+                                            @endphp
 
-        <tr class="{{ $isEstSelectionne ? 'table-primary font-weight-bold' : '' }}">
-            <td>{{ $key + 1 }}</td>
-            <td>
-                <span class="{{ $isEstSelectionne ? 'text-primary' : '' }}">
-                    @if ($isEstSelectionne)
-                        <i class="fa fa-arrow-circle-right text-primary mr-1"></i>
-                    @endif
-                    <a href="{{ route('ventes.index', ['details' => $v->id]) }}"
-                        class="btn btn-sm {{ $isEstSelectionne ? 'btn-primary shadow' : 'btn-info' }}"
-                        title="Voir les détails">
-                        {{ $v->client->cl_prenom ?? '' }} {{ $v->client->cl_nom ?? '' }}
-                    </a>
-                </span>
-            </td>
-            <td>{{ $v->created_at->format('d/m/Y') }}</td>
-            <td class="text-center">
-                {{-- Badge "Validée" affiché uniquement si la vente est validée --}}
-                @if ($v->vte_etat)
-                    <span class="badge badge-success mr-1">
-                        <i class="fa fa-check"></i> Validée
-                    </span>
-                @endif
+                                            <tr class="{{ $isEstSelectionne ? 'table-primary font-weight-bold' : '' }}">
+                                                <td>{{ $key + 1 }}</td>
+                                                <td>
+                                                    <span class="{{ $isEstSelectionne ? 'text-primary' : '' }}">
+                                                        @if ($isEstSelectionne)
+                                                            <i class="fa fa-arrow-circle-right text-primary mr-1"></i>
+                                                        @endif
+                                                        <a href="{{ route('ventes.index', ['details' => $v->id]) }}"
+                                                            class="btn btn-sm {{ $isEstSelectionne ? 'btn-primary shadow' : 'btn-info' }}"
+                                                            title="Voir les détails">
+                                                            {{ $v->client->cl_prenom ?? '' }} {{ $v->client->cl_nom ?? '' }}
+                                                        </a>
+                                                    </span>
+                                                </td>
+                                                <td>{{ $v->created_at->format('d/m/Y') }}</td>
+                                                <td class="text-center">
+                                                    {{-- Badge "Validée" affiché uniquement si la vente est validée --}}
+                                                    @if ($v->vte_etat)
+                                                        <span class="badge badge-success mr-1">
+                                                            <i class="fa fa-check"></i> Validée
+                                                        </span>
+                                                    @endif
 
-                {{-- Affichage des boutons si la vente n'est pas validée OU si l'utilisateur est admin --}}
-                @if ($peutModifier)
-                    {{-- Bouton Valider (masqué si déjà validée) --}}
-                    @if (!$v->vte_etat)
-                        <a href="{{ route('ventes.valider', $v->id) }}"
-                            class="btn btn-sm btn-success"
-                            onclick="return confirm('Valider définitivement cette vente ?')"
-                            title="Valider la vente">
-                            <i class="fa fa-check-square-o"></i>
-                        </a>
-                    @endif
+                                                    {{-- Affichage des boutons si la vente n'est pas validée OU si l'utilisateur est admin --}}
+                                                    @if ($peutModifier)
+                                                        {{-- Bouton Valider (masqué si déjà validée) --}}
+                                                        @if (!$v->vte_etat)
+                                                            <a href="{{ route('ventes.valider', $v->id) }}"
+                                                                class="btn btn-sm btn-success"
+                                                                onclick="return confirm('Valider définitivement cette vente ?')"
+                                                                title="Valider la vente">
+                                                                <i class="fa fa-check-square-o"></i>
+                                                            </a>
+                                                        @endif
 
-                    {{-- Bouton Modifier --}}
-                    <a href="{{ route('ventes.create', $v->id) }}"
-                        class="btn btn-sm btn-warning" 
-                        title="Modifier">
-                        <i class="fa fa-pencil text-white"></i>
-                    </a>
+                                                        {{-- Bouton Modifier --}}
+                                                        <a href="{{ route('ventes.create', $v->id) }}"
+                                                            class="btn btn-sm btn-warning" title="Modifier">
+                                                            <i class="fa fa-pencil text-white"></i>
+                                                        </a>
 
-                    {{-- Bouton Supprimer --}}
-                    <a href="{{ route('ventes.delete', $v->id) }}"
-                        class="btn btn-sm btn-danger"
-                        onclick="return confirm('Supprimer cette vente {{ $v->vte_etat ? "validée " : "" }}?')" 
-                        title="Supprimer">
-                        <i class="fa fa-trash"></i>
-                    </a>
-                @endif
-            </td>
-        </tr>
-    @endforeach
-</tbody>
+                                                        {{-- Bouton Supprimer --}}
+                                                        <a href="{{ route('ventes.delete', $v->id) }}"
+                                                            class="btn btn-sm btn-danger"
+                                                            onclick="return confirm('Supprimer cette vente {{ $v->vte_etat ? 'validée ' : '' }}?')"
+                                                            title="Supprimer">
+                                                            <i class="fa fa-trash"></i>
+                                                        </a>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
                                 </table>
                             </div>
                         </div>
@@ -137,7 +136,9 @@
                             <div class="card-body">
                                 @php
                                     $totalVente = $produitsVendus->sum(fn($p) => $p->vdr_pu * $p->vdr_qte);
-                                    $sommePayee = \App\Models\Paiement::where('vte_id', $venteSelectionnee->id)->sum('pa_payer');
+                                    $sommePayee = \App\Models\Paiement::where('vte_id', $venteSelectionnee->id)->sum(
+                                        'pa_payer',
+                                    );
                                     $resteApayer = $totalVente - $sommePayee;
                                     $modes = \DB::table('modes')->get();
                                 @endphp
@@ -177,15 +178,18 @@
                                                 </span>
                                             </li>
                                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                Total Facturé : <strong>{{ number_format($totalVente, 0, ',', ' ') }} F</strong>
+                                                Total Facturé : <strong>{{ number_format($totalVente, 0, ',', ' ') }}
+                                                    F</strong>
                                             </li>
                                             <li
                                                 class="list-group-item d-flex justify-content-between align-items-center text-success">
-                                                Total Encaissé : <strong>{{ number_format($sommePayee, 0, ',', ' ') }} F</strong>
+                                                Total Encaissé : <strong>{{ number_format($sommePayee, 0, ',', ' ') }}
+                                                    F</strong>
                                             </li>
                                             <li
                                                 class="list-group-item d-flex justify-content-between align-items-center text-danger">
-                                                Reste à recouvrer : <strong>{{ number_format($resteApayer, 0, ',', ' ') }} F</strong>
+                                                Reste à recouvrer : <strong>{{ number_format($resteApayer, 0, ',', ' ') }}
+                                                    F</strong>
                                             </li>
                                         </ul>
                                         @if ($resteApayer > 0)
@@ -258,7 +262,8 @@
                                                         @endphp
                                                         <tr>
                                                             <td>{{ $key + 1 }}</td>
-                                                            <td>{{ $pv->produit->pro_nom }} ( {{ $pv->produit->pro_type }} )</td>
+                                                            <td>{{ $pv->produit->pro_nom }} ( {{ $pv->produit->pro_type }}
+                                                                )</td>
                                                             <td>{{ number_format($pv->vdr_pu, 0, ',', ' ') }} F</td>
                                                             <td>{{ $pv->vdr_qte }}</td>
                                                             <td>{{ number_format($subTotal, 0, ',', ' ') }} F</td>
@@ -274,20 +279,24 @@
                                                                         <i class="fa fa-trash"></i>
                                                                     </a>
                                                                 @else
-                                                                    <i class="fa fa-lock text-muted" title="Ligne verrouillée"></i>
+                                                                    <i class="fa fa-lock text-muted"
+                                                                        title="Ligne verrouillée"></i>
                                                                 @endif
                                                             </td>
                                                         </tr>
                                                     @empty
                                                         <tr>
-                                                            <td colspan="6" class="text-center text-muted">Aucun produit dans cette vente.</td>
+                                                            <td colspan="6" class="text-center text-muted">Aucun
+                                                                produit dans cette vente.</td>
                                                         </tr>
                                                     @endforelse
                                                     @if ($produitsVendus->count() > 0)
                                                         <tr class="table-warning">
-                                                            <td colspan="4" class="text-right"><strong>TOTAL GÉNÉRAL :</strong></td>
+                                                            <td colspan="4" class="text-right"><strong>TOTAL GÉNÉRAL
+                                                                    :</strong></td>
                                                             <td colspan="2">
-                                                                <strong>{{ number_format($grandTotal, 0, ',', ' ') }} F</strong>
+                                                                <strong>{{ number_format($grandTotal, 0, ',', ' ') }}
+                                                                    F</strong>
                                                             </td>
                                                         </tr>
                                                     @endif
@@ -297,9 +306,10 @@
                                     </div>
 
                                     {{-- Onglet 3 : Paiement de la vente --}}
+                                    {{-- Onglet 3 : Paiement de la vente --}}
                                     <div class="tab-pane fade" id="pills-paie" role="tabpanel"
                                         aria-labelledby="pills-paie-tab">
-                                        @if ($venteSelectionnee->vte_etat)
+                                        @if ($venteSelectionnee && $venteSelectionnee->vte_etat)
                                             @php $maxAutorise = $totalVente - $sommePayee; @endphp
 
                                             <form action="{{ route('paiement.store') }}" method="POST"
@@ -319,10 +329,14 @@
                                                         </div>
                                                     </div>
                                                 </div>
+
                                                 <select name="mod_id" class="form-control mr-2" required>
-                                                    <option value="">-- Mode --</option>
+                                                    <option value="">-- Mode de paiement --</option>
                                                     @foreach ($modes as $m)
-                                                        <option value="{{ $m->id }}">{{ $m->mod_nom }}</option>
+                                                        @if ($venteSelectionnee && $m->fer_id == $venteSelectionnee->fer_id)
+                                                            <option value="{{ $m->id }}">{{ $m->mod_nom }}
+                                                            </option>
+                                                        @endif
                                                     @endforeach
                                                 </select>
 
@@ -333,31 +347,38 @@
                                             </form>
                                         @else
                                             <div class="alert alert-warning">
-                                                <i class="fa fa-info-circle"></i> Vous devez <strong>valider la vente</strong> (bouton vert à gauche) pour pouvoir enregistrer des paiements.
+                                                <i class="fa fa-info-circle"></i> Vous devez <strong>valider la
+                                                    vente</strong> (bouton vert à gauche) pour pouvoir enregistrer des
+                                                paiements.
                                             </div>
                                         @endif
 
                                         <h6>Historique des paiements
-                                            <a href="{{ route('paiement.recu', $venteSelectionnee->id) }}"
-                                                target="_blank" class="btn btn-xs btn-secondary float-right mb-2"
-                                                title="Imprimer le reçu">
-                                                <i class="fa fa-print"></i> Imprimer le reçu
-                                            </a>
+                                            @if ($venteSelectionnee)
+                                                <a href="{{ route('paiement.recu', $venteSelectionnee->id) }}"
+                                                    target="_blank" class="btn btn-xs btn-secondary float-right mb-2"
+                                                    title="Imprimer le reçu">
+                                                    <i class="fa fa-print"></i> Imprimer le reçu
+                                                </a>
+                                            @endif
                                         </h6>
+
                                         <div class="table-responsive">
                                             <table class="table table-sm table-bordered">
                                                 <thead>
                                                     <tr>
                                                         <th>Date</th>
+                                                        <th>Mode</th>
                                                         <th>Montant</th>
                                                         <th class="text-center">État</th>
                                                         <th class="text-center">Actions</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    @foreach ($historique as $p)
+                                                    @forelse ($historique as $p)
                                                         <tr>
                                                             <td>{{ $p->created_at->format('d/m/Y') }}</td>
+                                                            <td>{{ $p->mode->mod_nom ?? 'N/A' }}</td>
                                                             <td>{{ number_format($p->pa_payer, 0, ',', ' ') }} F</td>
                                                             <td class="text-center">
                                                                 <span
@@ -366,7 +387,7 @@
                                                                 </span>
                                                             </td>
                                                             <td class="text-center">
-                                                                @if (!$p->pa_etat || $etatUser == 1)
+                                                                @if (!$p->pa_etat || ($etatUser ?? 0) == 1)
                                                                     <a href="{{ route('paiement.valider', [$p->id, 'tab' => 'pills-paie']) }}"
                                                                         class="btn btn-xs btn-success"
                                                                         title="Valider le paiement"
@@ -388,7 +409,12 @@
                                                                 @endif
                                                             </td>
                                                         </tr>
-                                                    @endforeach
+                                                    @empty
+                                                        <tr>
+                                                            <td colspan="5" class="text-center text-muted">Aucun
+                                                                paiement enregistré pour cette vente.</td>
+                                                        </tr>
+                                                    @endforelse
                                                 </tbody>
                                             </table>
                                         </div>

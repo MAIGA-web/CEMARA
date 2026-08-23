@@ -348,7 +348,7 @@
                                         style="font-size: 14px;">
                                         <span class="text-muted"><span class="text-primary mr-2">●</span>
                                             {{ $prod->pro_nom }} {{ $prod->pro_type }}:</span>
-                                        <strong class="text-dark">{{ $prod->pro_stock }} (Unités / KG / Tête(s))</strong>
+                                        <strong class="text-dark">{{ $prod->pro_stock }} (Unités = KG / Tête(s)/Flacon(s))</strong>
                                     </li>
                                 @empty
                                     <li class="list-group-item text-center text-muted py-3">Aucun produit en stock

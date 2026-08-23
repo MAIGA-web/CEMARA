@@ -24,7 +24,7 @@
                 {{-- ################################################################### --}}
                 {{-- ################## Partie Gauche : Liste Alimentations ############ --}}
                 {{-- ################################################################### --}}
-                <div class="col-md-7">
+                <div class="col-lg-7 col-md-7">
                     <div class="card">
                         <div class="card-header">
                             <strong class="card-title">Suivi des Alimentations</strong>
@@ -117,7 +117,7 @@
                 {{-- ################################################################### --}}
                 {{-- ################## Partie Droite : Composants & Formulaires ###### --}}
                 {{-- ################################################################### --}}
-                <div class="col-md-5">
+                <div class="col-md-5 col-md-5">
                     @if ($alimentationSelectionnee)
                         <div class="card">
                             <div class="card-header bg-dark text-white">
@@ -211,8 +211,8 @@
             {{-- Inclusion conditionnelle du formulaire d'édition partiel --}}
             @if ($acc === 'AM' && $alimenterEnEdition)
                 <div class="row">
-                    <div class="col-7"></div>
-                    <div class="col-5">
+                    <div class="col-lg-7 col-md-10"></div>
+                    <div class="col-lg-5 col-md-10">
                         @include('Alimentations.partials.edit_alimenter')
                     </div>
                 </div>

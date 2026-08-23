@@ -11,9 +11,6 @@ use App\Models\Produit;
 
 class TransformationController extends Controller
 {
-    /**
-     * Page principale (Index)
-     */
     public function index(Request $request)
     {
         $fer_id = session('fer_id') ?? auth()->user()->fer_id ?? 1;
@@ -22,7 +19,6 @@ class TransformationController extends Controller
         $transformation_selectionnee = null;
         $liaisons_transformer = collect();
 
-        // Si on consulte une transformation spécifique (Panneau de droite)
         if ($trans_id) {
             $transformation_selectionnee = Transformation::with('matiere')
                 ->where('fer_id', $fer_id)
@@ -35,7 +31,6 @@ class TransformationController extends Controller
             }
         }
 
-        // Liste des transformations à gauche (Filtrée par ferme)
         $transformations = Transformation::with('matiere')
             ->where('fer_id', $fer_id)
             ->orderBy('created_at', 'DESC')
@@ -49,15 +44,11 @@ class TransformationController extends Controller
         ));
     }
 
-    /**
-     * Formulaire d'ajout
-     */
     public function create()
     {
         $fer_id = session('fer_id') ?? auth()->user()->fer_id ?? 1;
         $transformation = new Transformation();
         
-        // Récupère les matières premières disponibles en stock pour CETTE ferme
         $matieres = Matiere::where('fer_id', $fer_id)
             ->where('ma_stock', '>', 0)
             ->get();
@@ -65,32 +56,20 @@ class TransformationController extends Controller
         return view('Transformations.create', compact('transformation', 'matieres'));
     }
 
-    /**
-     * 🛑 LA MÉTHODE MANQUANTE : Formulaire de modification d'une transformation existante
-     */
     public function edit($id)
     {
         $fer_id = session('fer_id') ?? auth()->user()->fer_id ?? 1;
-
-        // 1. Récupérer la transformation à modifier (et vérifier qu'elle appartient à la bonne ferme)
         $transformation = Transformation::where('fer_id', $fer_id)->findOrFail($id);
 
-        // Sécurité : On bloque la modification si elle est déjà validée
         if ($transformation->trans_etat == 1) {
             return redirect()->route('transformations.index')
-                ->with('error_message', 'Impossible de modifier une transformation déjà validée et verrouillée.');
+                ->with('error_message', 'Impossible de modifier une transformation déjà validée.');
         }
 
-        // 2. Récupérer les matières premières pour la liste déroulante
         $matieres = Matiere::where('fer_id', $fer_id)->get();
-
-        // 3. Renvoyer la vue "create" (qui gère l'édition grâce au formulaire dynamique)
         return view('Transformations.create', compact('transformation', 'matieres'));
     }
 
-    /**
-     * Enregistrement et traitement des actions (Création, Modification, Validation, Suppression)
-     */
     public function store(Request $request)
     {
         $action = $request->input('emp');
@@ -99,7 +78,7 @@ class TransformationController extends Controller
         switch ($action) {
 
             // ==========================================
-            // CASE 'C' : CRÉATION + RENDEMENT AUTOMATIQUE À 97%
+            // CASE 'C' : CRÉATION AVEC VÉRIFICATION DU STOCK
             // ==========================================
             case 'C':
                 $request->validate([
@@ -107,9 +86,17 @@ class TransformationController extends Controller
                     'trans_qte' => 'required|numeric|min:0.01',
                 ]);
 
+                // 1. Vérification du stock réel disponible
+                $matiere = Matiere::where('id', $request->ma_id)->where('fer_id', $fer_id)->firstOrFail();
+
+                if ($request->trans_qte > $matiere->ma_stock) {
+                    return redirect()->back()
+                        ->with('error_message', "Erreur : La quantité saisie (" . number_format($request->trans_qte, 2, ',', ' ') . ") dépasse le stock disponible de matière première (" . number_format($matiere->ma_stock, 2, ',', ' ') . ").")
+                        ->withInput();
+                }
+
                 $transformation = DB::transaction(function () use ($request, $fer_id) {
 
-                    // 1. Création de la fiche de transformation principale
                     $trans = Transformation::create([
                         'ma_id'      => $request->ma_id,
                         'trans_qte'  => $request->trans_qte,
@@ -117,32 +104,34 @@ class TransformationController extends Controller
                         'trans_etat' => 0
                     ]);
 
-                    // 2. Récupérer les produits finis (pro_type = 2 pour transformation)
                     $produitsFinis = Produit::where('pro_etat', 2)
                         ->where('fer_id', $fer_id)
                         ->get();
 
-                    // 3. Calcul du rendement automatique à 97%
-                    $rendementGlobal = $request->trans_qte * 0.97;
+                    $nbProduits = $produitsFinis->count();
 
-                    foreach ($produitsFinis as $produit) {
-                        Transformer::create([
-                            'trans_id'  => $trans->id,
-                            'pro_id'    => $produit->id,
-                            'trme_qte'  => $rendementGlobal,
-                            // 'trans_id' => $request->trans_qte,
-                            'fer_id'    => $fer_id
-                        ]);
+                    if ($nbProduits > 0) {
+                        // Rendement total = 97% de la quantité injectée, réparti équitablement entre les produits
+                        $rendementParProduit = ($request->trans_qte * 0.97) / $nbProduits;
+
+                        foreach ($produitsFinis as $produit) {
+                            Transformer::create([
+                                'trans_id' => $trans->id,
+                                'pro_id'   => $produit->id,
+                                'trme_qte' => $rendementParProduit,
+                                'fer_id'   => $fer_id
+                            ]);
+                        }
                     }
 
                     return $trans;
                 });
 
                 return redirect()->route('transformations.index', ['trans_id' => $transformation->id])
-                    ->with('success_message', 'Transformation créée ! Le rendement estimé à 97% a été généré automatiquement.');
+                    ->with('success_message', 'Transformation créée ! Le rendement total à 97% a été généré.');
 
             // ==========================================
-            // CASE 'U' : MISE À JOU DE LA QUANTITÉ INJECTÉE
+            // CASE 'U' : MISE À JOUR DE LA QUANTITÉ INJECTÉE
             // ==========================================
             case 'U':
                 $request->validate([
@@ -157,25 +146,35 @@ class TransformationController extends Controller
                     return redirect()->back()->with('error_message', 'Action impossible, cette transformation est verrouillée.');
                 }
 
-                DB::transaction(function () use ($transformation, $request) {
+                // Vérification du stock
+                $matiere = Matiere::where('id', $request->ma_id)->where('fer_id', $fer_id)->firstOrFail();
+                if ($request->trans_qte > $matiere->ma_stock) {
+                    return redirect()->back()
+                        ->with('error_message', "Erreur : La quantité saisie (" . number_format($request->trans_qte, 2, ',', ' ') . ") dépasse le stock disponible (" . number_format($matiere->ma_stock, 2, ',', ' ') . ").")
+                        ->withInput();
+                }
+
+                DB::transaction(function () use ($transformation, $request, $fer_id) {
                     $transformation->update([
                         'ma_id'     => $request->ma_id,
                         'trans_qte' => $request->trans_qte,
                     ]);
 
-                    // Recalcul automatique à 97%
-                    $rendementGlobal = $request->trans_qte * 0.97;
-                    Transformer::where('trans_id', $transformation->id)->update([
-                        'trme_qte'  => $rendementGlobal,
-                        'trans_id' => $request->trans_id
-                    ]);
+                    $produitsFinisCount = Transformer::where('trans_id', $transformation->id)->count();
+
+                    if ($produitsFinisCount > 0) {
+                        $rendementParProduit = ($request->trans_qte * 0.97) / $produitsFinisCount;
+                        Transformer::where('trans_id', $transformation->id)->update([
+                            'trme_qte' => $rendementParProduit
+                        ]);
+                    }
                 });
 
                 return redirect()->route('transformations.index', ['trans_id' => $transformation->id])
                     ->with('success_message', 'Transformation et rendements mis à jour !');
 
             // ==========================================
-            // CASE 'PU' : AJUSTEMENT MANUEL D'UNE QUANTITÉ PRODUITE
+            // CASE 'PU' : AJUSTEMENT MANUEL DU RENDEMENT
             // ==========================================
             case 'PU':
                 $request->validate([
@@ -190,14 +189,13 @@ class TransformationController extends Controller
                     return redirect()->back()->with('error_message', 'Cette opération est déjà validée et verrouillée.');
                 }
 
-                // Sauvegarde de l'ajustement manuel saisi par l'utilisateur
                 $transformer->update(['trme_qte' => $request->trme_qte]);
 
                 return redirect()->route('transformations.index', ['trans_id' => $transformer->trans_id, 'tab' => 'pills-products'])
                     ->with('success_message', 'Rendement ajusté avec succès.');
 
             // ==========================================
-            // CASE 'PRV' : VALIDATION FINALE ET MOUVEMENTS DE STOCKS
+            // CASE 'PRV' : VALIDATION FINALE & MOUVEMENTS DE STOCK
             // ==========================================
             case 'PRV':
                 $id = $request->input('trans_id');
@@ -209,18 +207,19 @@ class TransformationController extends Controller
                         return;
                     }
 
-                    // 1. Changement d'état définitif
-                    $transformation->update(['trans_etat' => 1]);
+                    // Double vérification au moment de déduire le stock
+                    $matiere = Matiere::where('id', $transformation->ma_id)->where('fer_id', $fer_id)->lockForUpdate()->first();
 
-                    // 2. SOUSTRAIRE la matière première consommée du stock
-                    $matiere = Matiere::where('id', $transformation->ma_id)->where('fer_id', $fer_id)->first();
                     if ($matiere) {
+                        if ($matiere->ma_stock < $transformation->trans_qte) {
+                            throw new \Exception("Stock insuffisant pour la matière première : " . $matiere->ma_nom);
+                        }
+
                         $matiere->update([
                             'ma_stock' => (float)$matiere->ma_stock - (float)$transformation->trans_qte
                         ]);
                     }
 
-                    // 3. AJOUTER les produits transformés obtenus au stock de produits finis
                     $rendements = Transformer::where('trans_id', $id)->get();
                     foreach ($rendements as $rendement) {
                         $produitFini = Produit::where('id', $rendement->pro_id)->where('fer_id', $fer_id)->first();
@@ -230,13 +229,15 @@ class TransformationController extends Controller
                             ]);
                         }
                     }
+
+                    $transformation->update(['trans_etat' => 1]);
                 });
 
                 return redirect()->route('transformations.index', ['trans_id' => $id])
                     ->with('success_message', 'Transformation validée ! Stocks mis à jour.');
 
             // ==========================================
-            // CASE 'D' : SUPPRESSION D'UNE TRANSFORMATION
+            // CASE 'D' : SUPPRESSION
             // ==========================================
             case 'D':
                 $id = $request->input('trans_id');

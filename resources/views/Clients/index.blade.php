@@ -51,29 +51,30 @@
                                         $i = 1;
                                     @endphp
                                     @foreach ($client as $client_value)
-                                        @php
-                                            echo '<td>' . $i++ . '</td>';
-                                        @endphp
-                                        <td>{{ $client_value['cl_nom'] }}</td>
-                                        <td>{{ $client_value['cl_prenom'] }}</td>
-                                        <td>{{ $client_value['cl_adresse'] }}</td>
-                                        <td>{{ $client_value['cl_sexe'] }}</td>
-                                        <td>{{ $client_value['cl_tel'] }}</td>
-                                        @if ($client_value['cl_etat'] == 1)
-                                            <td class="text-success">Actif</td>
-                                        @else
-                                            <td class="text-danger">Inactif</td>
-                                        @endif
-                                        {{-- <td>{{$client_value['cl_etat']}}</td> --}}
-                                        <td>
-                                            <a href="{{ url('/Clients/add-edit/' . $client_value['id']) }}"
-                                                class="btn btn-primary" {{-- data-url="{{ url('/Clients/add-edit/'.$client_value['id']) }}" --}}>
-                                                <i class="fa fa-pencil"></i>
-                                            </a>
-                                            <a href="{{ url('/Clients/delete/' . $client_value['id']) }}"
-                                                class="btn btn-danger" onclick="return confirm('Voulez-vous supprimer le client {{$client_value['cl_prenom'] }} {{$client_value['cl_nom'] }}')"><i class="fa fa-trash"></i>    
-                                                            </a>
-                                        </td>
+                                        <tr>
+                                            <td>{{ $i++ }}</td>
+                                            <td>{{ $client_value['cl_nom'] }}</td>
+                                            <td>{{ $client_value['cl_prenom'] }}</td>
+                                            <td>{{ $client_value['cl_adresse'] }}</td>
+                                            <td>{{ $client_value['cl_sexe'] }}</td>
+                                            <td>{{ $client_value['cl_tel'] }}</td>
+                                            @if ($client_value['cl_etat'] == 1)
+                                                <td class="text-success">Actif</td>
+                                            @else
+                                                <td class="text-danger">Inactif</td>
+                                            @endif
+                                            {{-- <td>{{$client_value['cl_etat']}}</td> --}}
+                                            <td>
+                                                <a href="{{ url('/Clients/add-edit/' . $client_value['id']) }}"
+                                                    class="btn btn-primary" {{-- data-url="{{ url('/Clients/add-edit/'.$client_value['id']) }}" --}}>
+                                                    <i class="fa fa-pencil"></i>
+                                                </a>
+                                                <a href="{{ url('/Clients/delete/' . $client_value['id']) }}"
+                                                    class="btn btn-danger"
+                                                    onclick="return confirm('Voulez-vous supprimer le client {{ $client_value['cl_prenom'] }} {{ $client_value['cl_nom'] }}')"><i
+                                                        class="fa fa-trash"></i>
+                                                </a>
+                                            </td>
                                         </tr>
                                     @endforeach
                                 </tbody>

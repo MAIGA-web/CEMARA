@@ -1,10 +1,10 @@
 @extends('layout.header')
-
+@section('contenu')
 <div id="right-panel" class="right-panel">
     <div class="content">
         <div class="animated fadeIn">
             <div class="row">
-                <div class="col-lg-3"></div>
+                <div class="col-lg-1"></div>
                 <div class="col-lg-6">
                     <div class="card">
                         <div class="card-header">
@@ -55,3 +55,4 @@
         </div>
     </div>
 </div>
+@endsection

@@ -8,7 +8,7 @@
                     <i class="fa fa-exclamation-triangle"></i> {{ session('error_message') }}
                 </div>
             @endif
-            <div class="card-header"><strong>Modifier le paiement</strong></div>
+            <div class="card-header"><strong>Modifier le paiements</strong></div>
             <div class="card-body">
                 <form action="{{ route('paiement.update', $paiement->id) }}" method="POST">
                     @csrf
@@ -18,7 +18,7 @@
                             value="{{ old('pa_payer', $paiement->pa_payer) }}">
                     </div>
                     <div class="form-group">
-                        <label>Mode de paiement</label>
+                        <label>Mode du paiement</label>
                         <select name="mod_id" class="form-control">
                             @foreach ($modes as $m)
                                 <option value="{{ $m->id }}" {{ $paiement->mod_id == $m->id ? 'selected' : '' }}>

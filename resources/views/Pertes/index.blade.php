@@ -176,10 +176,10 @@
 
             @if ($acc === 'AM' && $perdreEnEdition)
                 <div class="row">
-                    <div class="col-7">
+                    <div class="col-lg-7 col-md-12">
                         {{-- @include('Pertes.partials.edit_perdre') --}}
                     </div>
-                    <div class="col-5">
+                    <div class="col-lg-5 col-md-12">
                         @include('Pertes.partials.edit_perdre')
                     </div>
                 </div>

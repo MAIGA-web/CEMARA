@@ -16,70 +16,79 @@ use Illuminate\Support\Facades\Validator;
 class VenteController extends Controller
 {
     // 1. Affichage principal (Liste + Détails si ID fourni)
-    public function index(Request $request)
-    {
-        $fer_id = session('fer_id') ?? (auth()->user()->fer_id ?? null);
+// 1. Affichage principal (Liste + Détails si ID fourni)
+public function index(Request $request)
+{
+    // 1. Ferme par défaut depuis la session ou l'utilisateur connecté
+    $fer_id = session('fer_id') ?? (auth()->user()->fer_id ?? null);
 
-        $venteSelectionnee = null;
-        $produitsVendus = [];
-        $historique = [];
+    $venteSelectionnee = null;
+    $produitsVendus = [];
+    $historique = [];
 
-        if ($request->has('details')) {
-            $venteSelectionnee = Vente::with('client')->find($request->details);
-            if ($venteSelectionnee) {
-                $produitsVendus = Vendre::with('produit')
-                    ->where('vte_id', $venteSelectionnee->id)
-                    ->get();
-                $historique = \App\Models\Paiement::where('vte_id', $venteSelectionnee->id)->get();
+    if ($request->has('details')) {
+        $venteSelectionnee = Vente::with('client')->find($request->details);
+        
+        if ($venteSelectionnee) {
+            $produitsVendus = Vendre::with('produit')
+                ->where('vte_id', $venteSelectionnee->id)
+                ->get();
 
-                if ($venteSelectionnee->fer_id) {
-                    $fer_id = $venteSelectionnee->fer_id;
-                }
+            $historique = \App\Models\Paiement::with('mode')
+                ->where('vte_id', $venteSelectionnee->id)
+                ->get();
+
+            // CRITIQUE : Si la vente a un fer_id définit, on utilise CELUI-CI pour filtrer les modes de paiement
+            if (!empty($venteSelectionnee->fer_id)) {
+                $fer_id = $venteSelectionnee->fer_id;
             }
         }
-
-        // if (!$fer_id) {
-        //     $fer_id = Vente::value('fer_id') ?? DB::table('fermes')->value('id');
-        // }
-
-        $ventes = Vente::where('fer_id', $fer_id)->with('client')->latest()->get();
-        $produits = Produit::where('fer_id', $fer_id)->get();
-        $moes = Mode::where('fer_id', $fer_id)->get();
-        // dd($fer_id, $modes->toArray());
-        return view('Ventes.index', compact(
-            'ventes',
-            'venteSelectionnee',
-            'produitsVendus',
-            'historique',
-            'produits',
-            'moes'
-        ));
     }
+
+    // 2. Récupération des données filtrées STRICTEMENT par $fer_id
+    $ventes = Vente::where('fer_id', $fer_id)->with('client')->latest()->get();
+    $produits = Produit::where('fer_id', $fer_id)->get();
+    
+    // Filtre strict : ne récupère que le mode associé à la ferme active (Ex: fer_id = 4 -> Orange Money uniquement)
+    $modes = Mode::where('fer_id', $fer_id)->get();
+
+    return view('Ventes.index', compact(
+        'ventes',
+        'venteSelectionnee',
+        'produitsVendus',
+        'historique',
+        'produits',
+        'modes'
+    ));
+}
 
     // 2. Création ou modification d'une Vente (Client / État)
-    public function createOrUpdate(Request $request, $id = null)
-    {
-        $vente = $id ? Vente::findOrFail($id) : new Vente();
+public function createOrUpdate(Request $request, $id = null)
+{
+    $vente = $id ? Vente::findOrFail($id) : new Vente();
+    $fer_id = session('fer_id') ?? (auth()->user()->fer_id ?? null);
 
-        if ($request->isMethod('post')) {
-            $request->validate([
-                'cl_id' => 'required|exists:clients,id',
-            ], [
-                'cl_id.required' => 'Le choix du client est obligatoire.',
-            ]);
+    if ($request->isMethod('post')) {
+        $request->validate([
+            'cl_id' => 'required|exists:clients,id',
+        ], [
+            'cl_id.required' => 'Le choix du client est obligatoire.',
+        ]);
 
-            $vente->cl_id = $request->cl_id;
-            $vente->vte_etat = $request->has('vte_etat') ? true : false;
-            $vente->fer_id = session('fer_id') ?? auth()->user()->fer_id;
-            $vente->save();
+        $vente->cl_id = $request->cl_id;
+        $vente->vte_etat = $request->has('vte_etat') ? true : false;
+        $vente->fer_id = $fer_id;
+        $vente->save();
 
-            return redirect()->route('ventes.index', ['details' => $vente->id])
-                ->with('success_message', 'Vente enregistrée avec succès.');
-        }
-
-        $clients = Client::all();
-        return view('Ventes.create_vente', compact('vente', 'clients'));
+        return redirect()->route('ventes.index', ['details' => $vente->id])
+            ->with('success_message', 'Vente enregistrée avec succès.');
     }
+
+    // Filtrage strict des clients par ferme
+    $clients = Client::where('fer_id', $fer_id)->get();
+    
+    return view('Ventes.create_vente', compact('vente', 'clients'));
+}
 
     // 3. Ajouter un produit à une vente
     public function storeProduit(Request $request)
@@ -206,6 +215,7 @@ class VenteController extends Controller
                 ->with('error_message', "Erreur : Le montant saisi (" . number_format($request->pa_payer, 0, ',', ' ') . " F) dépasse le reste à payer (" . number_format($resteAPayer, 0, ',', ' ') . " F).")
                 ->withInput();
         }
+        
 
         // 4. Si c'est bon, on enregistre
         $paiement = new \App\Models\Paiement();
@@ -218,6 +228,7 @@ class VenteController extends Controller
 
         return redirect()->route('ventes.index', ['details' => $request->vte_id, 'tab' => 'pills-paie'])
             ->with('success_message', 'Paiement enregistré.');
+            
     }
 
     // Modifier un paiement (Formulaire)
@@ -230,7 +241,10 @@ public function editPaiement($id)
         return redirect()->back()->with('error_message', 'Impossible de modifier un paiement sur une vente validée.');
     }
 
-    $fer_id = session('fer_id') ?? auth()->user()->fer_id;
+    // Récupérer le fer_id de la vente, avec fallback sur session ou user
+    $fer_id = $vente->fer_id ?? session('fer_id') ?? (auth()->user()->fer_id ?? null);
+
+    // Filtrage strict des modes de paiement
     $modes = Mode::where('fer_id', $fer_id)->get();
 
     return view('Ventes.partials.edit_paiement', compact('paiement', 'modes', 'vente'));
@@ -302,39 +316,39 @@ public function editPaiement($id)
         return redirect()->back()->with('success_message', 'Paiement supprimé.');
     }
 
-public function valider($id)
-{
-    $vente = Vente::findOrFail($id);
+    public function valider($id)
+    {
+        $vente = Vente::findOrFail($id);
 
-    if ($vente->vte_etat) {
-        return redirect()->back()->with('error_message', 'Cette vente est déjà validée.');
-    }
-
-    DB::transaction(function () use ($vente) {
-        $produitsVendus = Vendre::where('vte_id', $vente->id)->get();
-
-        foreach ($produitsVendus as $item) {
-            $produit = Produit::lockForUpdate()->find($item->pro_id);
-
-            if ($produit) {
-                if ($produit->pro_stock < $item->vdr_qte) {
-                    throw new \Exception("Stock insuffisant pour le produit : " . $produit->pro_nom);
-                }
-
-                $produit->pro_stock -= $item->vdr_qte;
-                $produit->save();
-            }
+        if ($vente->vte_etat) {
+            return redirect()->back()->with('error_message', 'Cette vente est déjà validée.');
         }
 
-        $vente->vte_etat = true;
-        $vente->save();
-    });
+        DB::transaction(function () use ($vente) {
+            $produitsVendus = Vendre::where('vte_id', $vente->id)->get();
 
-    return redirect()->route('ventes.index', ['details' => $id])
-        ->with('success_message', 'Vente validée et stock mis à jour avec succès !');
-}
+            foreach ($produitsVendus as $item) {
+                $produit = Produit::lockForUpdate()->find($item->pro_id);
 
-public function recuPaiement($id)
+                if ($produit) {
+                    if ($produit->pro_stock < $item->vdr_qte) {
+                        throw new \Exception("Stock insuffisant pour le produit : " . $produit->pro_nom);
+                    }
+
+                    $produit->pro_stock -= $item->vdr_qte;
+                    $produit->save();
+                }
+            }
+
+            $vente->vte_etat = true;
+            $vente->save();
+        });
+
+        return redirect()->route('ventes.index', ['details' => $id])
+            ->with('success_message', 'Vente validée et stock mis à jour avec succès !');
+    }
+
+    public function recuPaiement($id)
     {
         // 1. Charger la vente AVEC ses paiements et son client
         $vente = \App\Models\Vente::with(['client', 'paiements'])->findOrFail($id);
@@ -347,7 +361,7 @@ public function recuPaiement($id)
         $logoPath = null;
         if ($ferme && $ferme->logo) {
             $checkPath = storage_path('app/public/logos/' . $ferme->logo);
-            
+
             // Si le fichier existe physiquement sur le disque du serveur
             if (file_exists($checkPath)) {
                 $logoPath = $checkPath;

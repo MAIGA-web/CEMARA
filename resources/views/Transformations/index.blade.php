@@ -239,13 +239,13 @@
                                                                             class="form-control form-control-sm text-center"
                                                                             value="{{ $lt->trme_qte }}"
                                                                             style="width: 100px; max-height:30px;"
-                                                                            min="0">
-                                                                        <button type="submit"
+                                                                            min="0" readonly>
+                                                                        {{-- <button type="submit"
                                                                             class="btn btn-sm btn-warning py-0"
                                                                             title="Sauvegarder l'ajustement"
                                                                             style="height: 30px;">
                                                                             <i class="fa fa-save text-white"></i>
-                                                                        </button>
+                                                                        </button> --}}
                                                                     </form>
                                                                 @else
                                                                     <strong>{{ number_format($lt->trme_qte, 2, ',', ' ') }} Kg</strong>

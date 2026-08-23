@@ -1,4 +1,4 @@
-<div class="card border-danger" style="margin-top: -8em">
+<div class="card border-danger">
     <div class="card-header bg-dark text-white">
         <strong>Modifier la perte de : {{ $perdreEnEdition->produit->pro_nom }}</strong>
     </div>
