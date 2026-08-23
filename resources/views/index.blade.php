@@ -117,7 +117,7 @@
                             <div class="d-flex justify-content-between align-items-center mb-1">
                                 <span class="text-left font-sm"><strong>{{ $pa->pro_nom }}</strong> <small
                                         class="text-muted">({{ $pa->pro_type }})</small></span>
-                                <span class="badge badge-danger p-2">{{ (int) $pa->total_qte }} Têtes</span>
+                                <span class="badge badge-danger p-2">{{ (int) $pa->total_qte }} Tête(s)/KG/Flacon(s)</span>
                             </div>
                         @empty
                             <strong class="text-success py-2">0 Tête</strong>
@@ -134,7 +134,7 @@
                             <div class="d-flex justify-content-between align-items-center mb-1">
                                 <span class="text-left font-sm"><strong>{{ $pm->pro_nom }}</strong> <small
                                         class="text-muted">({{ $pm->pro_type }})</small></span>
-                                <span class="badge badge-danger p-2">{{ (int) $pm->total_qte }} Têtes</span>
+                                <span class="badge badge-danger p-2">{{ (int) $pm->total_qte }} Tête(s)/KG/Flacon(s)</span>
                             </div>
                         @empty
                             <strong class="text-success py-2">0 Tête</strong>
@@ -151,7 +151,7 @@
                             <div class="d-flex justify-content-between align-items-center mb-1">
                                 <span class="text-left font-sm"><strong>{{ $ps->pro_nom }}</strong> <small
                                         class="text-muted">({{ $ps->pro_type }})</small></span>
-                                <span class="badge badge-danger p-2">{{ (int) $ps->total_qte }} Têtes</span>
+                                <span class="badge badge-danger p-2">{{ (int) $ps->total_qte }} Tête(s)/KG/Flacon(s)</span>
                             </div>
                         @empty
                             <strong class="text-success py-2">0 Tête</strong>
@@ -168,10 +168,10 @@
                             <div class="d-flex justify-content-between align-items-center mb-1">
                                 <span class="text-left font-sm"><strong>{{ $pj->pro_nom }}</strong> <small
                                         class="text-muted">({{ $pj->pro_type }})</small></span>
-                                <span class="badge badge-danger p-2">{{ (int) $pj->total_qte }} Têtes</span>
+                                <span class="badge badge-danger p-2">{{ (int) $pj->total_qte }} Tête(s)/KG/Flacon(s)</span>
                             </div>
                         @empty
-                            <strong class="text-success py-2">0 Tête</strong>
+                            <strong class="text-success py-2">0 Tête(s)/KG/Flacon(s)</strong>
                         @endforelse
                     </div>
                 </div>
