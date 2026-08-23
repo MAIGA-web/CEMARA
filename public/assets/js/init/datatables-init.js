@@ -7,8 +7,8 @@
     if ($('#bootstrap-data-table').length) {
         $('#bootstrap-data-table').DataTable({
             lengthMenu: [[10, 20, 50, -1], [10, 20, 50, "Tout"]],
-            pagingType: "full_numbers", // <-- Résout le problème 'paging action: next'
-            destroy: true // Évite les conflits si le tableau est réinitialisé
+            pagingType: "full_numbers", // Résout l'erreur 'paging action: next'
+            destroy: true
         });
     }
 
@@ -17,7 +17,7 @@
         $('#bootstrap-data-table-export').DataTable({
             dom: 'lBfrtip',
             lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Tout"]],
-            pagingType: "full_numbers",
+            pagingType: "full_numbers", // Appliqué également ici pour sécurité
             buttons: [
                 'copy', 'csv', 'excel', 'pdf', 'print'
             ]
