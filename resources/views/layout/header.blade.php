@@ -141,7 +141,7 @@
 
 
                             @if (!empty($fermeActive) && $fermeActive->fer_logo)
-                                <img src="{{ asset('assets/images/' . $fermeActive->fer_logo) }}"
+                                <img src="{{ asset('storage/' . $fermeActive->fer_logo) }}"
                                     alt="Logo {{ $fermeActive->fer_nom }}" class="mr-2"
                                     style="height: 35px; width: 35px; border-radius: 50%; object-fit: cover; border: 1px solid #18828a;">
                             @else
